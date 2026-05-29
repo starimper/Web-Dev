@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyAI – ARIA Engine</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07090f;--s1:#0d1117;--s2:#131b24;--s3:#1c2639;--border:rgba(56,189,248,.12);--acc:#38bdf8;--acc2:#a78bfa;--green:#34d399;--amber:#fbbf24;--red:#f87171;--txt:#e2e8f0;--mut:#64748b}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(56,189,248,.2);border-radius:99px}
+#app{min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;height:100vh;width:228px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.main{margin-left:228px;min-height:100vh;padding:28px 32px}
+.page{animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:26px;font-weight:700;margin-bottom:4px}h2{font-size:20px;font-weight:700;margin-bottom:12px}h3{font-size:16px;font-weight:600;margin-bottom:10px}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;font-family:inherit;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,#38bdf8,#a78bfa);color:#fff}.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:transparent;color:var(--txt);border:1px solid var(--border)}.btn-g:hover{background:var(--s2);border-color:var(--acc)}
+.btn-d{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}.btn-d:hover{background:rgba(248,113,113,.2)}
+.btn-gr{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2)}.btn-gr:hover{background:rgba(52,211,153,.2)}
+.sm{padding:6px 12px;font-size:13px}.xs{padding:4px 9px;font-size:12px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fg label{font-size:13px;color:var(--mut);font-weight:500}
+.inp{width:100%;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--txt);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--acc)}.inp::placeholder{color:var(--mut)}
+select.inp option{background:var(--s1)}textarea.inp{resize:vertical;min-height:70px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;margin:2px 8px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--s2);color:var(--txt)}.nav-item.active{background:rgba(56,189,248,.08);color:var(--acc);border-left-color:var(--acc)}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.bh{background:rgba(248,113,113,.15);color:var(--red)}.bm{background:rgba(251,191,36,.15);color:var(--amber)}.bl{background:rgba(52,211,153,.15);color:var(--green)}.bi{background:rgba(56,189,248,.12);color:var(--acc)}
+.pb{height:6px;background:var(--s3);border-radius:99px;overflow:hidden}.pf{height:100%;border-radius:99px;transition:width .5s}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:fu .25s ease}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px;margin-bottom:10px}
+.mu{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.15);border-radius:12px 12px 2px 12px;padding:11px 15px;margin-left:48px;font-size:14px;line-height:1.6}
+.ma{background:var(--s2);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:11px 15px;margin-right:48px;font-size:14px;line-height:1.7}
+.mah{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.aa{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#fff}
+.sc{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.gt2{background:linear-gradient(135deg,#34d399,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.fb{display:flex;align-items:center}.fbb{display:flex;align-items:center;justify-content:space-between}
+.xb{margin-top:10px;padding:10px 13px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:8px;font-size:12px;color:var(--green)}
+.xb strong{display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.wg{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.wdh{padding:10px 6px;text-align:center;border-right:1px solid var(--border);background:var(--s1)}.wdh:last-child{border-right:none}
+.wdb{min-height:90px;padding:5px;border-right:1px solid var(--border);border-top:1px solid var(--border);background:var(--s2)}.wdb:last-child{border-right:none}
+.we{padding:3px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sm2{height:8px;border-radius:99px;background:var(--s3);overflow:hidden}.sf{height:100%;border-radius:99px;transition:width .6s}
+.tog{width:42px;height:22px;border-radius:99px;background:var(--s3);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--acc)}.togt{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:99px;background:#fff;transition:left .2s}.tog.on .togt{left:22px}
+.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.td{width:6px;height:6px;border-radius:99px;background:var(--green);display:inline-block;animation:tdot 1.2s ease infinite}
+@keyframes tdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+.chip{display:inline-flex;align-items:center;padding:4px 11px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--mut);cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s}
+.chip:hover{border-color:var(--acc);color:var(--acc)}
+
+.sess-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--s1);margin-bottom:6px;transition:background .2s}
+.sess-row:hover{background:var(--s3)}
+.sess-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
+.sess-check.done{background:var(--green);border-color:var(--green)}
+.sess-bar{height:4px;border-radius:99px;background:var(--s3);overflow:hidden;flex:1}
+.sess-fill{height:100%;border-radius:99px}
+.today-sess{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;padding:14px}
+.today-sess-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:var(--s2);margin-bottom:8px;border:1px solid var(--border)}
+.today-sess-item.done-item{opacity:.55}
+.gen-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:16px}.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div id="app"></div>
+<script>
+
+
+
+const DB_NAME='studyai',DB_VER=2;
+let _idb=null;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(_idb){res(_idb);return;}
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('users')) db.createObjectStore('users',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('tasks')){const s=db.createObjectStore('tasks',{keyPath:'id'});s.createIndex('userId','userId',{unique:false});}
+      if(!db.objectStoreNames.contains('sessions')){const s=db.createObjectStore('sessions',{keyPath:'id'});s.createIndex('taskId','taskId',{unique:false});s.createIndex('userId','userId',{unique:false});s.createIndex('date','date',{unique:false});}
+      if(!db.objectStoreNames.contains('events')){const s=db.createObjectStore('events',{keyPath:'id'});s.createIndex('userId','userId',{unique:false});}
+      if(!db.objectStoreNames.contains('messages')){const s=db.createObjectStore('messages',{keyPath:'id'});s.createIndex('userId','userId',{unique:false});}
+    };
+    req.onsuccess=e=>{_idb=e.target.result;res(_idb);};
+    req.onerror=()=>rej(req.error);
+  });
+}
+
+async function dbGet(store,key){try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(key);req.onsuccess=()=>res(req.result||null);req.onerror=()=>rej(req.error);});}catch{return lsGet(store+'_'+key);}}
+async function dbPut(store,obj){try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');const req=tx.objectStore(store).put(obj);req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error);});}catch{lsPut(store+'_'+obj.id,obj);}}
+async function dbDel(store,key){try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');const req=tx.objectStore(store).delete(key);req.onsuccess=()=>res();req.onerror=()=>rej(req.error);});}catch{lsDel(store+'_'+key);}}
+async function dbGetByIndex(store,idx,val){try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).index(idx).getAll(val);req.onsuccess=()=>res(req.result||[]);req.onerror=()=>rej(req.error);});}catch{return lsGetByPrefix(store+'_',idx,val);}}
+async function dbGetAll(store){try{const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>rej(req.error);});}catch{return [];}}
+async function dbPutMany(store,items){for(const item of items)await dbPut(store,item);}
+async function dbDelMany(store,idx,val){const items=await dbGetByIndex(store,idx,val);for(const item of items)await dbDel(store,item.id);}
+
+
+const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v!=null?JSON.parse(v):d;}catch{return d;}};
+const lsPut=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const lsDel=(k)=>{try{localStorage.removeItem(k);}catch{}};
+function lsGetByPrefix(prefix,idx,val){const res=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)){try{const v=JSON.parse(localStorage.getItem(k));if(v&&v[idx]===val)res.push(v);}catch{}}}return res;}
+
+
+const Auth={
+  iterations:210000,
+  enc:new TextEncoder(),
+  b64:bytes=>btoa(String.fromCharCode(...bytes)),
+  unb64:str=>Uint8Array.from(atob(str),c=>c.charCodeAt(0)),
+  requireCrypto(){if(!window.crypto?.subtle)throw new Error('Secure password hashing is unavailable in this browser.');},
+  async hashPassword(password){
+    Auth.requireCrypto();
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const key=await crypto.subtle.importKey('raw',Auth.enc.encode(password),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:Auth.iterations,hash:'SHA-256'},key,256);
+    return `pbkdf2-sha256$${Auth.iterations}$${Auth.b64(salt)}$${Auth.b64(new Uint8Array(bits))}`;
+  },
+  async verifyPassword(password,storedHash){
+    Auth.requireCrypto();
+    try{
+      const parts=(storedHash||'').split('$');
+      if(parts.length!==4||parts[0]!=='pbkdf2-sha256')return false;
+      const iterations=parseInt(parts[1],10);
+      if(!Number.isFinite(iterations)||iterations<100000)return false;
+      const salt=Auth.unb64(parts[2]),expected=Auth.unb64(parts[3]);
+      const key=await crypto.subtle.importKey('raw',Auth.enc.encode(password),'PBKDF2',false,['deriveBits']);
+      const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations,hash:'SHA-256'},key,expected.length*8);
+      const actual=new Uint8Array(bits);
+      if(actual.length!==expected.length)return false;
+      let diff=0;for(let i=0;i<actual.length;i++)diff|=actual[i]^expected[i];
+      return diff===0;
+    }catch{return false;}
+  },
+  stripPlainPassword(user){
+    if(!user)return user;
+    const clean={...user};
+    if(clean.passwordHash)delete clean.password;
+    return clean;
+  },
+  async userWithPasswordHash(user,password){
+    const clean={...user,passwordHash:await Auth.hashPassword(password),passwordChangedAt:Date.now()};
+    delete clean.password;
+    return clean;
+  },
+  async authenticate(user,password){
+    if(!user)return null;
+    if(user.passwordHash)return await Auth.verifyPassword(password,user.passwordHash)?Auth.stripPlainPassword(user):null;
+    if(typeof user.password==='string'&&user.password===password)return await Auth.userWithPasswordHash(user,password);
+    return null;
+  }
+};
+
+
+const DB={
+  
+  getUser:id=>dbGet('users',id),
+  saveUser:user=>dbPut('users',user),
+  getUsers:()=>dbGetAll('users'),
+  getUserByEmail:async email=>(await dbGetAll('users')).find(u=>u.email===email)||null,
+  
+  getTasksByUser:uid=>dbGetByIndex('tasks','userId',uid),
+  saveTask:task=>dbPut('tasks',task),
+  deleteTask:id=>dbDel('tasks',id),
+  getTask:id=>dbGet('tasks',id),
+  
+  getSessionsByUser:uid=>dbGetByIndex('sessions','userId',uid),
+  getSessionsByTask:tid=>dbGetByIndex('sessions','taskId',tid),
+  getSessionsByDate:(uid,date)=>dbGetByIndex('sessions','date',date).then(ss=>ss.filter(s=>s.userId===uid)),
+  saveSession:s=>dbPut('sessions',s),
+  saveSessions:ss=>dbPutMany('sessions',ss),
+  deleteSessionsByTask:tid=>dbDelMany('sessions','taskId',tid),
+  updateSession:(id,updates)=>dbGet('sessions',id).then(s=>{if(s)return dbPut('sessions',{...s,...updates});}),
+  
+  getEventsByUser:uid=>dbGetByIndex('events','userId',uid),
+  saveEvent:e=>dbPut('events',e),
+  deleteEvent:id=>dbDel('events',id),
+  
+  getMsgsByUser:uid=>dbGetByIndex('messages','userId',uid),
+  saveMsg:m=>dbPut('messages',m),
+  clearMsgs:async uid=>{const ms=await dbGetByIndex('messages','userId',uid);for(const m of ms)await dbDel('messages',m.id);},
+};
+
+
+const Users={
+  getAll:()=>lsGet('users',[]),
+  find:email=>Users.getAll().find(u=>u.email===email),
+  findById:id=>Users.getAll().find(u=>u.id===id),
+  save:user=>{const safe=Auth.stripPlainPassword(user);const all=Users.getAll().map(Auth.stripPlainPassword);const idx=all.findIndex(u=>u.id===safe.id);if(idx>=0)all[idx]=safe;else all.push(safe);lsPut('users',all);lsPut('cu',safe);DB.saveUser(safe).catch(()=>{});},
+  getCurrent:()=>lsGet('cu'),
+  setCurrent:user=>lsPut('cu',Auth.stripPlainPassword(user)),
+  clearCurrent:()=>lsDel('cu'),
+};
+
+async function migrateStoredPasswords(){
+  const all=Users.getAll();
+  const migrated=[];
+  let changed=false;
+  for(const user of all){
+    if(user?.password){
+      migrated.push(await Auth.userWithPasswordHash(user,user.password));changed=true;
+    }else{
+      const clean=Auth.stripPlainPassword(user);migrated.push(clean);changed=changed||clean!==user;
+    }
+  }
+  if(changed)lsPut('users',migrated);
+
+  const idbUsers=await DB.getUsers().catch(()=>[]);
+  for(const user of idbUsers){
+    if(user?.password)await DB.saveUser(await Auth.userWithPasswordHash(user,user.password));
+    else if(user?.passwordHash)await DB.saveUser(Auth.stripPlainPassword(user));
+  }
+
+  const current=Users.getCurrent();
+  if(!current)return null;
+  let clean=migrated.find(u=>u.id===current.id)||current;
+  if(clean.password)clean=await Auth.userWithPasswordHash(clean,clean.password);
+  else clean=Auth.stripPlainPassword(clean);
+  if(!migrated.some(u=>u.id===clean.id)){migrated.push(clean);lsPut('users',migrated);}
+  Users.setCurrent(clean);
+  return clean;
+}
+
+
+
+
+const SessionGen={
+  
+  generate(task){
+    if(!task.deadline||!task.estimatedTime)return[];
+    const now=new Date();now.setHours(0,0,0,0);
+    const deadline=new Date(task.deadline);deadline.setHours(0,0,0,0);
+    const totalHours=parseFloat(task.estimatedTime)||0;
+    if(totalHours<=0)return[];
+    const daysAvail=Math.max(1,Math.ceil((deadline-now)/86400000)+1); 
+    const hoursPerDay=Math.round((totalHours/daysAvail)*10)/10;
+    
+    let daysToUse=daysAvail;
+    let hpd=hoursPerDay;
+    if(hpd<0.5&&daysAvail>1){
+      
+      daysToUse=Math.max(1,Math.floor(totalHours/0.5));
+      hpd=Math.round((totalHours/daysToUse)*10)/10;
+    }
+    if(hpd>4){
+      
+      
+      hpd=Math.round(hpd*10)/10;
+    }
+    const sessions=[];
+    
+    const startOffset=daysAvail-daysToUse;
+    for(let i=0;i<daysToUse;i++){
+      const d=new Date(now);d.setDate(now.getDate()+startOffset+i);
+      const isOverdue=d<now;
+      sessions.push({
+        id:uid(),taskId:task.id,userId:task.userId||'',
+        date:d.toISOString().split('T')[0],
+        duration:hpd,status:'pending',
+        dayNum:i+1,totalDays:daysToUse,
+        taskTitle:task.title,taskCourse:task.course||'',
+        createdAt:Date.now()
+      });
+    }
+    return sessions;
+  },
+  
+  describe(task){
+    if(!task.deadline||!task.estimatedTime)return null;
+    const now=new Date();now.setHours(0,0,0,0);
+    const deadline=new Date(task.deadline);deadline.setHours(0,0,0,0);
+    const totalHours=parseFloat(task.estimatedTime)||0;
+    const daysAvail=Math.max(1,Math.ceil((deadline-now)/86400000)+1);
+    const daysToUse=totalHours<0.5*daysAvail?Math.max(1,Math.floor(totalHours/0.5)):daysAvail;
+    const hpd=Math.round((totalHours/daysToUse)*10)/10;
+    return{totalHours,daysAvail,daysToUse,hpd};
+  }
+};
+
+
+
+
+let S={
+  page:Users.getCurrent()?'dashboard':'landing',
+  user:Users.getCurrent(),
+  landTab:'features',archTab:'usecase',
+  taskFilter:'all',taskSort:'score',
+  tasks:[],sessions:[],events:[],msgs:[],
+  loading:false,weekOff:0,modal:null,
+  stressRes:null,saved:false,
+  expandedTask:null, 
+  todaySessions:[], 
+};
+
+async function loadData(){
+  if(!S.user)return;
+  const uid=S.user.id;
+  [S.tasks,S.sessions,S.events,S.msgs]=await Promise.all([
+    DB.getTasksByUser(uid),
+    DB.getSessionsByUser(uid),
+    DB.getEventsByUser(uid),
+    DB.getMsgsByUser(uid),
+  ]);
+  S.tasks.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  S.sessions.sort((a,b)=>a.date.localeCompare(b.date)||(a.dayNum-b.dayNum));
+  S.msgs.sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(!S.msgs.length){
+    const m={id:uid2(),role:'assistant',intent:'GREETING',content:ARIA.greet(S.user.name,S.tasks,S.sessions),userId:uid,ts:Date.now()};
+    await DB.saveMsg(m);S.msgs=[m];
+  }
+  updateTodaySessions();
+}
+function updateTodaySessions(){
+  const today=new Date().toISOString().split('T')[0];
+  S.todaySessions=S.sessions.filter(s=>s.date===today);
+}
+async function saveTask(task){
+  await DB.saveTask(task);
+  
+  await DB.deleteSessionsByTask(task.id);
+  if(task.status!=='done'){
+    const newSess=SessionGen.generate(task);
+    
+    const oldSess=S.sessions.filter(s=>s.taskId===task.id);
+    const doneByDay={};oldSess.forEach(s=>{if(s.status==='done')doneByDay[s.date]=true;});
+    newSess.forEach(s=>{if(doneByDay[s.date])s.status='done';});
+    await DB.saveSessions(newSess);
+  }
+  
+  await loadData();
+}
+async function deleteTask(id){
+  await DB.deleteTask(id);
+  await DB.deleteSessionsByTask(id);
+  await loadData();
+}
+async function toggleSession(sessId){
+  const s=S.sessions.find(x=>x.id===sessId);
+  if(!s)return;
+  await DB.updateSession(sessId,{status:s.status==='done'?'pending':'done'});
+  await loadData();render();
+}
+
+const uid=()=>Math.random().toString(36).slice(2,10);
+const uid2=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function fd(d){if(!d)return'N/A';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function dl(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000)}
+const pc=p=>({high:'bh',medium:'bm',low:'bl'}[p]||'bl');
+const pl=p=>({high:'High',medium:'Medium',low:'Low'}[p]||p);
+function md(t){
+  return esc(t)
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code style="background:var(--s3);padding:1px 6px;border-radius:4px;font-size:13px">$1</code>')
+    .replace(/^### (.*?)$/gm,'<strong style="font-size:14px;display:block;margin:8px 0 3px;color:var(--acc)">$1</strong>')
+    .replace(/^## (.*?)$/gm,'<strong style="font-size:15px;display:block;margin:10px 0 4px">$1</strong>')
+    .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:10px 0">')
+    .replace(/^[•\-] (.*?)$/gm,'<div style="display:flex;gap:8px;margin:3px 0"><span style="color:var(--green);flex-shrink:0">•</span><span>$1</span></div>')
+    .replace(/^(\d+)\. (.*?)$/gm,'<div style="display:flex;gap:8px;margin:3px 0"><span style="color:var(--acc);font-weight:700;min-width:16px;flex-shrink:0">$1.</span><span>$2</span></div>')
+    .replace(/\n/g,'<br>');
+}
+
+// Render engine
+function render(){
+  const app=document.getElementById('app');if(!app)return;
+  if(S.page==='landing'){app.innerHTML=renderLanding();aLanding();}
+  else if(S.page==='login'||S.page==='register'){app.innerHTML=renderAuth();aAuth();}
+  else if(S.user){app.innerHTML=renderLayout(renderPage());aLayout();aPage();}
+  else{S.page='landing';render();}
+  if(S.modal)renderModal();
+}
+// ═══════════════════════════════════════════════════
+//  ICONS
+// ═══════════════════════════════════════════════════
+const IC={home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',tasks:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',alert:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',chart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',check:'<polyline points="20 6 9 17 4 12"/>',trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6m5 0V4h4v2"/>',edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',chevron_down:'<polyline points="6 9 12 15 18 9"/>',chevron_up:'<polyline points="18 15 12 9 6 15"/>',refresh:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',split:'<line x1="21" y1="3" x2="3" y2="21"/><polyline points="21 21 21 3"/><polyline points="3 3 3 21"/>'};
+function ico(n,sz=16,c='currentColor'){return`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">${IC[n]||IC.info}</svg>`;}
+
+// ═══════════════════════════════════════════════════
+//  ARIA ENGINE — Custom AI
+// ═══════════════════════════════════════════════════
+const ARIA=(function(){
+  function scoreTask(t){
+    const d=dl(t.deadline);
+    let u=d===null?10:d<0?100:d===0?95:d===1?85:d<=3?70:d<=7?50:d<=14?30:15;
+    const pw={high:40,medium:22,low:8}[t.priority]||0;
+    const sb=t.status==='in_progress'?12:0;
+    return Math.min(100,Math.round(u*0.55+pw*0.75+sb*0.15));
+  }
+  function detectStress(tasks,sessions){
+    const now=new Date();
+    const overdue=tasks.filter(t=>t.deadline&&new Date(t.deadline)<now&&t.status!=='done').length;
+    const in48h=tasks.filter(t=>{if(!t.deadline||t.status==='done')return false;const h=(new Date(t.deadline)-Date.now())/3600000;return h>=0&&h<=48;}).length;
+    const high=tasks.filter(t=>t.priority==='high'&&t.status!=='done').length;
+    // Session overload: if today has >4 hours of pending sessions
+    const today=now.toISOString().split('T')[0];
+    const todayH=(sessions||[]).filter(s=>s.date===today&&s.status!=='done').reduce((a,s)=>a+(s.duration||0),0);
+    const isHigh=overdue>=2||in48h>=3||high>=4||todayH>4;
+    const score=Math.min(100,overdue*20+in48h*15+high*10+(todayH>4?15:0));
+    return{isHigh,score,overdue,in48h,high,todayH};
+  }
+  const INTENTS={
+    GREETING:[/^(hi|hello|hey|good\s*(morning|evening|afternoon)|what.s up|yo\b)/i],
+    ABOUT:[/who are you|what are you|about aria|your capabilities|what can you do|how do you work/i],
+    PRIORITIZE:[/prioriti[sz]|what.*first|most important|what.*focus|where.*start|what.*urgent|top task|rank/i],
+    PLAN_TODAY:[/today.s plan|plan.*today|what.*today|today.*schedule|what should i do today|sessions.*today/i],
+    PLAN_WEEK:[/week.*plan|plan.*week|weekly.*schedule|this week/i],
+    STRESS:[/stress|overwhelm|burnout|too much|anxious|anxiety|can.t handle|falling behind/i],
+    DEADLINES:[/deadline|due\s*soon|upcoming|what.*due|due date/i],
+    TASK_STATUS:[/how many task|task.*status|my task|progress|overview|summary/i],
+    SESSIONS:[/session|study session|how.*divided|split.*task|daily.*plan|hours.*day/i],
+    MOTIVATION:[/motivat|procrastinat|lazy|can.t focus|can.t start|no.*energy|stuck/i],
+    STUDY_TIPS:[/how.*study|study.*technique|memoriz|remember.*better|learn faster|concentrate/i],
+    POMODORO:[/pomodoro|25.*min|work.*break|timer|focus.*session/i],
+    TIME_ESTIMATE:[/how long|time.*need|estimate|hours.*finish|when.*done/i],
+    TIPS_EXAM:[/exam.*tip|prepare.*exam|exam.*prep|before.*exam|night before/i],
+  };
+  function classify(text){for(const[i,p]of Object.entries(INTENTS)){for(const r of p)if(r.test(text))return i;}return'FALLBACK';}
+  function greet(name,tasks,sessions){
+    const first=name.split(' ')[0];
+    const pending=tasks.filter(t=>t.status!=='done').length;
+    const today=new Date().toISOString().split('T')[0];
+    const todaySess=(sessions||[]).filter(s=>s.date===today);
+    const doneSess=todaySess.filter(s=>s.status==='done').length;
+    const st=detectStress(tasks,sessions);
+    return`## Hi ${first}! I'm ARIA 👋\n**A**cademic **R**esource & **I**ntelligence **A**ssistant — custom-built with smart task splitting.\n\n**Today:** ${todaySess.length} study session${todaySess.length!==1?'s':''} scheduled${todaySess.length?` (${doneSess} done, ${todaySess.length-doneSess} remaining)`:''}\n**Pending tasks:** ${pending} · ${st.isHigh?'⚠️ High stress detected':'✅ Workload manageable'}\n\n**What I can do:**\n- **"Plan today"** — shows your actual scheduled sessions from the DB\n- **"Prioritize my tasks"** — ARIA scoring formula\n- **"Show my sessions"** — all scheduled study sessions\n- **"Am I stressed?"** — Lab 4 classifier\n- **"Study tips"**, **"Motivate me"**, **"Exam prep tips"**\n\nWhat would you like help with?`;
+  }
+  function handle(intent,text,tasks,sessions,name){
+    const first=name.split(' ')[0];
+    if(intent==='GREETING')return{content:greet(name,tasks,sessions),intent,xai:null};
+    if(intent==='ABOUT')return{content:`## About ARIA\n\nCustom AI built for this project at KBTU.\n\n**Core systems:**\n- **Smart Session Generator** — splits tasks into daily work sessions stored in IndexedDB\n- **Intent Classifier** — 14 NLP categories\n- **Priority Scorer** — urgency×0.55 + priority×0.30 + status×0.15\n- **Stress Detector** — Lab 4 rule classifier (F1=0.762)\n- **Session-aware planning** — "Plan today" reads actual DB sessions\n- **XAI** — every response explains its reasoning\n- **Groq fallback** — free Llama-3 for open questions`,intent,xai:null};
+    if(intent==='SESSIONS'){
+      const pending=tasks.filter(t=>t.status!=='done');
+      const withSess=pending.filter(t=>sessions.some(s=>s.taskId===t.id));
+      if(!withSess.length)return{content:`No sessions generated yet. **Add tasks with both a deadline and estimated hours** — ARIA will automatically split them into daily sessions.\n\nExample: Task "Write report", deadline in 6 days, 6 hours estimated → **1 hour/day for 6 days**.`,intent,xai:null};
+      let out=`## Your Study Sessions\n\n`;
+      withSess.forEach(t=>{
+        const tSess=sessions.filter(s=>s.taskId===t.id&&s.status!=='done');
+        const done=sessions.filter(s=>s.taskId===t.id&&s.status==='done').length;
+        const total=sessions.filter(s=>s.taskId===t.id).length;
+        out+=`**${t.title}**${t.course?' ('+t.course+')':''} · ${done}/${total} sessions done\n`;
+        tSess.slice(0,3).forEach(s=>out+=`  - ${s.date}: ${s.duration}h\n`);
+        if(tSess.length>3)out+=`  - ...and ${tSess.length-3} more\n`;
+        out+='\n';
+      });
+      return{content:out,intent,xai:`Sessions are generated by the Smart Session Generator when you create a task with deadline + estimated hours. Formula: hours_per_day = total_hours / days_available.`};
+    }
+    if(intent==='PLAN_TODAY'){
+      const today=new Date().toISOString().split('T')[0];
+      const todaySess=sessions.filter(s=>s.date===today);
+      const pending=todaySess.filter(s=>s.status!=='done');
+      const done=todaySess.filter(s=>s.status==='done');
+      if(!todaySess.length){
+        // Fallback to ARIA-generated plan
+        const ptasks=tasks.filter(t=>t.status!=='done');
+        if(!ptasks.length)return{content:`No tasks or sessions for today. You're all clear! 🎉`,intent,xai:null};
+        const scored=ptasks.map(t=>({...t,s:scoreTask(t)})).sort((a,b)=>b.s-a.s);
+        let out=`## Today's ARIA Plan\n\n*No scheduled sessions from DB — generating based on priority:*\n\n`;
+        let hr=8;
+        scored.slice(0,4).forEach((t,i)=>{
+          const est=parseFloat(t.estimatedTime)||1.5;
+          const fh=h=>{const hrs=Math.floor(h),m=Math.round((h-hrs)*60),ap=hrs<12?'AM':'PM',d=hrs>12?hrs-12:hrs===0?12:hrs;return`${d}:${m.toString().padStart(2,'0')} ${ap}`;};
+          out+=`📚 **${fh(hr)}–${fh(hr+est)}** · ${t.title}\n${t.course?'Course: '+t.course+' · ':''}${est}h · Score: ${t.s}/100\n\n`;
+          hr+=est+0.5;
+        });
+        return{content:out,intent,xai:`No DB sessions found for today. Showing ARIA's priority-based plan instead. Add tasks with deadlines + estimated hours to get auto-scheduled sessions.`};
+      }
+      let out=`## Today's Study Sessions\n\nFrom your scheduled plan (IndexedDB):\n\n`;
+      if(done.length)out+=`✅ **Completed:** ${done.map(s=>s.taskTitle).join(', ')}\n\n`;
+      if(pending.length){
+        out+=`📚 **Remaining today:**\n`;
+        pending.forEach(s=>{out+=`- **${s.taskTitle}** — ${s.duration}h${s.taskCourse?' ('+s.taskCourse+')':''} · Session ${s.dayNum}/${s.totalDays}\n`;});
+        const totalLeft=pending.reduce((a,s)=>a+(s.duration||0),0);
+        out+=`\n**Total remaining: ${totalLeft}h**\n\n`;
+        out+=`💡 Work in 25-min blocks. Check off sessions in the Tasks or Dashboard page.`;
+      }else out+=`🎉 **All sessions done for today!** Great work, ${first}.`;
+      return{content:out,intent,xai:`Sessions retrieved from IndexedDB. Generated by Smart Session Generator when you created tasks with deadline + estimated hours.`};
+    }
+    if(intent==='PRIORITIZE'){
+      const pending=tasks.filter(t=>t.status!=='done');
+      if(!pending.length)return{content:`No pending tasks! Add tasks on the Tasks page.`,intent,xai:null};
+      const scored=pending.map(t=>({...t,sc:scoreTask(t)})).sort((a,b)=>b.sc-a.sc).slice(0,5);
+      let out=`## Prioritized Tasks\n\nFormula: urgency×0.55 + priority_weight×0.30 + status×0.15\n\n`;
+      scored.forEach((t,i)=>{
+        const d=dl(t.deadline);
+        const bar='█'.repeat(Math.round(t.sc/10))+'░'.repeat(10-Math.round(t.sc/10));
+        const dStr=d===null?'no deadline':d<0?`⚠️ ${Math.abs(d)}d overdue`:d===0?'🔴 TODAY':d===1?'🟠 tomorrow':`🟡 ${d}d left`;
+        const sess=sessions.filter(s=>s.taskId===t.id&&s.status!=='done').length;
+        out+=`**${i+1}. ${t.title}**\nScore: ${t.sc}/100 \`${bar}\`\n${dStr}${t.course?' · '+t.course:''}${sess>0?` · ${sess} sessions left`:''}${t.estimatedTime?` · ${t.estimatedTime}h total`:''}\n\n`;
+      });
+      return{content:out,intent,xai:`Score = urgency(0–100 by days, 55%) + priority weight (High=40,Med=22,Low=8, 30%) + in-progress bonus (12pts, 15%). Based on Lab 3: deadline urgency is top stress driver (mean=3.9).`};
+    }
+    if(intent==='PLAN_WEEK'){
+      const days=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const week={Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[]};
+      const now=new Date();now.setHours(0,0,0,0);
+      // Group sessions by day of week for the next 7 days
+      let hasSessions=false;
+      for(let i=0;i<7;i++){
+        const d=new Date(now);d.setDate(now.getDate()+i);
+        const ds=d.toISOString().split('T')[0];
+        const dayName=d.toLocaleDateString('en-US',{weekday:'long'});
+        if(days.includes(dayName)){
+          const daySess=sessions.filter(s=>s.date===ds&&s.status!=='done');
+          if(daySess.length){week[dayName].push(...daySess);hasSessions=true;}
+        }
+      }
+      if(!hasSessions){
+        return{content:`No sessions scheduled for this week yet.\n\n**To get a weekly plan:** Add tasks with both a **deadline** and **estimated hours** — ARIA will automatically create daily sessions stored in the database.\n\nExample: "Write essay" · Deadline: Friday · 4 hours → **1 hour/day Mon–Thu**.`,intent,xai:null};
+      }
+      let out=`## Your Week at a Glance\n\nSessions from the database:\n\n`;
+      days.forEach(day=>{
+        if(!week[day].length)return;
+        const totalH=week[day].reduce((a,s)=>a+(s.duration||0),0);
+        out+=`**${day}** (${totalH}h total)\n`;
+        week[day].forEach(s=>out+=`- ${s.taskTitle}: ${s.duration}h\n`);
+        out+='\n';
+      });
+      const totalWeekH=Object.values(week).flat().reduce((a,s)=>a+(s.duration||0),0);
+      out+=`---\n📊 **Total this week: ${totalWeekH}h** across ${Object.values(week).flat().length} sessions`;
+      return{content:out,intent,xai:`Sessions pulled from IndexedDB, grouped by weekday. Sessions generated automatically when you add tasks with deadline + hours.`};
+    }
+    if(intent==='STRESS'){
+      const st=detectStress(tasks,sessions);
+      let out=st.isHigh?`## ⚠️ Stress Analysis — HIGH\n\n`:`## ✅ Stress Analysis — Manageable\n\n`;
+      out+=`- Overdue tasks: **${st.overdue}** ${st.overdue>=2?'⚠️':'✅'}\n`;
+      out+=`- Due in 48h: **${st.in48h}** ${st.in48h>=3?'⚠️':'✅'}\n`;
+      out+=`- High-priority active: **${st.high}** ${st.high>=4?'⚠️':'✅'}\n`;
+      out+=`- Today's session load: **${st.todayH}h** ${st.todayH>4?'⚠️ (>4h is heavy)':'✅'}\n`;
+      out+=`- Score: **${st.score}/100**\n\n`;
+      if(st.isHigh)out+=`**Actions:**\n1. Check today's sessions in the Dashboard\n2. If overloaded, reschedule low-priority sessions\n3. Pomodoro: 25min focus → 5min break\n4. Ask: "Plan today" for your actual session list`;
+      return{content:out,intent,xai:`Lab 4 classifier rules: HIGH if overdue≥2 OR in48h≥3 OR high-priority≥4 OR today's session load>4h. Score=overdue×20+in48h×15+high×10+overload×15.`};
+    }
+    if(intent==='DEADLINES'){
+      const pending=tasks.filter(t=>t.status!=='done'&&t.deadline);
+      if(!pending.length)return{content:`No tasks with deadlines. Add deadlines on the Tasks page.`,intent,xai:null};
+      const sorted=pending.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+      let out=`## Upcoming Deadlines\n\n`;
+      sorted.slice(0,8).forEach(t=>{
+        const d=dl(t.deadline);
+        const em=d<0?'🔴':d===0?'🟠':d<=2?'🟡':'🟢';
+        const wh=d<0?`${Math.abs(d)}d overdue`:d===0?'TODAY':d===1?'tomorrow':`in ${d} days`;
+        const sess=sessions.filter(s=>s.taskId===t.id&&s.status!=='done').length;
+        out+=`${em} **${t.title}** — ${wh}\n${fd(t.deadline)}${t.course?' · '+t.course:''}${sess>0?` · ${sess} sessions left`:''}${t.estimatedTime?` · ${t.estimatedTime}h total`:''}\n\n`;
+      });
+      return{content:out,intent,xai:null};
+    }
+    if(intent==='TASK_STATUS'){
+      const total=tasks.length,done=tasks.filter(t=>t.status==='done').length;
+      const pending=tasks.filter(t=>t.status!=='done').length;
+      const ov=tasks.filter(t=>t.deadline&&new Date(t.deadline)<new Date()&&t.status!=='done').length;
+      const rate=total?Math.round(done/total*100):0;
+      const totalSess=sessions.length,doneSess=sessions.filter(s=>s.status==='done').length;
+      const st=detectStress(tasks,sessions);
+      return{content:`## Task & Session Summary\n\n**Tasks:** ${total} total · ${done} done (${rate}%) · ${pending} pending · ${ov} overdue\n**Sessions:** ${totalSess} total · ${doneSess} done · ${totalSess-doneSess} remaining\n**Stress:** ${st.isHigh?'HIGH ⚠️':'Manageable ✅'} (${st.score}/100)\n\n${rate>=75?'🎉 Excellent progress!':rate>=40?'📈 Good — keep going.':'💪 Ask me to "prioritize my tasks" to get started.'}`,intent,xai:null};
+    }
+    if(intent==='MOTIVATION'){const tips=[`## Breaking Through\n\n**2-minute rule:** Start with just 2 minutes on the hardest task. Momentum builds naturally.\n\n**Check your sessions:** Open the Dashboard and find today's sessions. Pick the shortest one and start now.\n\nOnce started, stopping is harder than continuing.`,`## Regaining Focus\n\n**Environment:** Study in the same spot every session.\n\n**Phone:** Put it in another room. Every notification costs 20+ minutes of refocus.\n\n**Right now:** Open ARIA chat, type "Plan today" — seeing your actual sessions makes starting easier.`,`## Low Energy Fix\n\n- Drink water right now\n- 10 jumping jacks\n- Study 25min → step outside 5min\n\nLow energy is usually dehydration, not laziness.`];return{content:tips[Math.floor(Math.random()*tips.length)],intent,xai:null};}
+    if(intent==='STUDY_TIPS')return{content:`## Evidence-Based Techniques\n\n**1. Spaced Repetition** — Review at 1d → 3d → 1w → 1mo intervals\n**2. Active Recall** — Test yourself, don't re-read\n**3. Feynman Technique** — Explain it simply; gaps reveal gaps\n**4. Pomodoro** — 25 min focus → 5 min break\n**5. Interleaving** — Mix subjects in one session\n\n*Survey (Lab 3, n=54): 78% want smart reminders to use these.*`,intent,xai:null};
+    if(intent==='POMODORO'){const ts=sessions.filter(s=>s.date===new Date().toISOString().split('T')[0]&&s.status!=='done').slice(0,3);let out=`## Pomodoro Session 🍅\n\n25 min focus → 5 min break. After 4 rounds: 30 min break.\n\n`;if(ts.length){out+=`**Your sessions for today:**\n`;ts.forEach((s,i)=>out+=`🍅 Round ${i+1}: ${s.taskTitle} (${s.duration}h)\n`);}else out+=`No sessions today. Ask: "Plan today" first.`;return{content:out,intent,xai:null};}
+    if(intent==='TIME_ESTIMATE'){const pending=tasks.filter(t=>t.status!=='done');const withE=pending.filter(t=>t.estimatedTime);const total=withE.reduce((a,t)=>a+(parseFloat(t.estimatedTime)||0),0);const sessH=sessions.filter(s=>s.status!=='done').reduce((a,s)=>a+(s.duration||0),0);return{content:`## Time Analysis\n\n- **Tasks with estimates:** ${withE.length}/${pending.length}\n- **Total estimated hours:** ${total.toFixed(1)}h\n- **Remaining in sessions (DB):** ${sessH.toFixed(1)}h\n\n${total>40?'⚠️ Heavy load — consider rescheduling.':total>20?`📊 ${Math.ceil(total/5)}h per day needed.`:'✅ Achievable — ask "Plan this week" to distribute.'}`,intent,xai:null};}
+    if(intent==='TIPS_EXAM')return{content:`## Exam Prep Strategy\n\n**1 Week Before:** Summary sheet · Practice problems · Identify weak areas\n**Night Before:** Review 30min max · Prepare materials · Sleep 7–8h\n**Day Of:** Eat breakfast · Arrive early · Read all questions first\n\n*Ask: "Plan today" for a focused exam-prep schedule using your DB sessions.*`,intent,xai:null};
+    return null;
+  }
+  return{scoreTask,detectStress,classify,handle,greet};
+})();
+
+async function callGroq(msgs,tasks,name){
+  const key=S.user.groqKey;if(!key)throw new Error('NO_KEY');
+  const today=new Date().toISOString().split('T')[0];
+  const ctx=tasks.filter(t=>t.status!=='done').slice(0,8).map(t=>`- ${t.title} (${t.priority}, due:${t.deadline||'none'}, est:${t.estimatedTime||'?'}h)`).join('\n');
+  const sessCtx=S.sessions.filter(s=>s.date===today).map(s=>`- ${s.taskTitle}: ${s.duration}h (${s.status})`).join('\n');
+  const sys=`You are ARIA, an academic AI assistant for KBTU students. Helpful, concise, warm. Use markdown. Under 250 words.\nStudent: ${name}\nTasks:\n${ctx||'None'}\nToday's sessions:\n${sessCtx||'None'}`;
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:600,messages:[{role:'system',content:sys},...msgs.slice(-10).map(m=>({role:m.role,content:m.content}))]})});
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'Groq error');}
+  const data=await res.json();return data.choices?.[0]?.message?.content||'No response.';
+}
+// ═══════════════════════════════════════════════════
+//  LANDING + AUTH + LAYOUT
+// ═══════════════════════════════════════════════════
+function renderLanding(){
+  return`<div style="min-height:100vh;background:var(--bg)">
+<nav style="position:sticky;top:0;z-index:50;background:rgba(7,9,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+  <div style="max-width:1100px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between">
+    <div class="fb" style="gap:8px"><div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">AR</div><span style="font-size:18px;font-weight:700">StudyAI <span style="font-size:12px;color:var(--mut)">/ ARIA</span></span></div>
+    <div class="fb" style="gap:8px"><button class="btn btn-g sm" data-go="login">Sign In</button><button class="btn btn-p sm" data-go="register">Get Started Free</button></div>
+  </div>
+</nav>
+<section style="text-align:center;padding:80px 24px 50px;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none"></div>
+  <div style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(56,189,248,.07) 0%,transparent 70%);pointer-events:none"></div>
+  <div style="position:relative;max-width:780px;margin:0 auto">
+    <span class="tag" style="background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);margin-bottom:18px;display:inline-block">Smart Task Splitting · IndexedDB · Custom AI · KBTU</span>
+    <h1 style="font-size:clamp(34px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:18px">Deadlines? ARIA splits tasks<br>into <span class="gt2">daily study sessions</span></h1>
+    <p style="font-size:17px;color:var(--mut);max-width:580px;margin:0 auto 28px;line-height:1.7">Add a task with a deadline and estimated hours. ARIA automatically generates a daily study schedule and saves it to a real database — no API key needed.</p>
+    <div style="background:var(--s2);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:18px 24px;max-width:500px;margin:0 auto 28px;text-align:left">
+      <div style="font-size:13px;color:var(--mut);margin-bottom:10px">Example:</div>
+      <div class="fbb" style="margin-bottom:8px"><span style="font-size:14px">📚 Write Research Report</span><span class="badge bl">Low stress</span></div>
+      <div style="font-size:13px;color:var(--mut);margin-bottom:10px">Deadline: 6 days · Estimated: 6 hours</div>
+      <div style="font-size:12px;color:var(--green);font-weight:600;margin-bottom:6px">↓ ARIA generates automatically:</div>
+      ${['Mon','Tue','Wed','Thu','Fri','Sat'].map((d,i)=>`<div class="fb" style="gap:8px;margin-bottom:4px"><span style="font-size:11px;color:var(--mut);min-width:30px">${d}</span><div style="flex:1;height:6px;background:var(--s3);border-radius:99px;overflow:hidden"><div style="width:${(1/6)*100}%;height:100%;background:var(--green);border-radius:99px"></div></div><span style="font-size:11px;color:var(--green)">1h</span></div>`).join('')}
+    </div>
+    <div class="fb" style="gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-p" style="font-size:15px;padding:12px 28px" data-go="register">${ico('zap',16,'#fff')} Start Free — No Setup</button>
+      <button class="btn btn-g" style="font-size:15px;padding:12px 28px" data-go="login">Sign In</button>
+    </div>
+    <div class="g4" style="max-width:680px;margin:44px auto 0">
+      ${[['IndexedDB','Real Database'],['Smart Split','Auto Daily Sessions'],['0.762','F1 Stress Score'],['Free','No API Key']].map(([v,l])=>`<div class="card" style="padding:14px;text-align:center"><div class="gt2" style="font-size:18px;font-weight:800;margin-bottom:3px">${v}</div><div style="font-size:12px;color:var(--mut)">${l}</div></div>`).join('')}
+    </div>
+  </div>
+</section>
+<div style="background:linear-gradient(180deg,var(--bg),var(--s1));padding:50px 24px;text-align:center;border-top:1px solid var(--border)">
+  <h2 style="font-size:28px;font-weight:800;margin-bottom:12px">Start managing your studies today</h2>
+  <p style="color:var(--mut);margin-bottom:22px">Free. No API key. Tasks split into daily sessions automatically.</p>
+  <button class="btn btn-p" style="font-size:15px;padding:12px 32px" data-go="register">${ico('zap',16,'#fff')} Create Free Account</button>
+</div>
+<footer style="border-top:1px solid var(--border);padding:18px 24px;text-align:center;color:var(--mut);font-size:13px">© 2025 StudyAI · Ruslan Baidayev · KBTU · Field Projects for Information Systems</footer>
+</div>`;}
+
+function renderAuth(){
+  const isR=S.page==='register';
+  return`<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)">
+<div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:500px;height:300px;background:radial-gradient(ellipse,rgba(52,211,153,.07) 0%,transparent 70%);pointer-events:none"></div>
+<div class="card" style="width:100%;max-width:400px;border-radius:14px;padding:32px;animation:fu .3s ease;position:relative">
+<div class="fb" style="gap:8px;margin-bottom:24px"><div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">AR</div><span style="font-size:17px;font-weight:700">StudyAI / ARIA</span></div>
+<h2 style="font-size:22px;margin-bottom:4px">${isR?'Create account':'Welcome back'}</h2>
+<p style="color:var(--mut);font-size:13px;margin-bottom:24px">${isR?'Tasks auto-split into daily sessions':'Sign in to your account'}</p>
+<div id="aerr" style="display:none;padding:10px 13px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:8px;color:var(--red);font-size:14px;margin-bottom:14px"></div>
+${isR?`<div class="fg"><label>Full Name</label><input class="inp" id="an" placeholder="Ruslan Baidayev"></div>`:''}
+<div class="fg"><label>Email</label><input class="inp" id="ae" type="email" placeholder="you@university.edu"></div>
+<div class="fg" style="margin-bottom:20px"><label>Password</label><input class="inp" id="ap" type="password" placeholder="••••••••"></div>
+<button class="btn btn-p" style="width:100%;justify-content:center;padding:11px;font-size:15px" id="asub">${isR?'Create Account':'Sign In'}</button>
+<div style="text-align:center;margin-top:18px;font-size:14px;color:var(--mut)">${isR?'Already have an account?':'No account?'} <button style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:14px;font-family:inherit" id="asw">${isR?'Sign in':'Create one'}</button></div>
+<button style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:13px;display:block;margin:10px auto 0;text-decoration:underline" data-go="landing">← Back</button>
+</div></div>`;}
+
+function renderLayout(pg){
+  const nav=[['dashboard','home','Dashboard'],['tasks','tasks','My Tasks'],['sessions','layers','Sessions'],['chat','chat','ARIA Chat'],['schedule','calendar','Schedule'],['stress','alert','Stress Check'],['analytics','chart','Analytics'],['profile','settings','Settings']];
+  const u=S.user;
+  const today=new Date().toISOString().split('T')[0];
+  const todayPending=S.sessions.filter(s=>s.date===today&&s.status!=='done').length;
+  return`<div class="sidebar">
+<div style="padding:18px 14px;border-bottom:1px solid var(--border)"><div class="fb" style="gap:8px"><div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">AR</div><div><div style="font-size:15px;font-weight:700">StudyAI</div><div style="font-size:10px;color:var(--green);font-weight:600">ARIA + IndexedDB</div></div></div></div>
+<div style="flex:1;padding:6px 0;overflow-y:auto">
+${nav.map(([id,ic,l])=>`<div class="nav-item${S.page===id?' active':''}" data-nav="${id}" style="position:relative">${ico(ic,17,S.page===id?'#38bdf8':'currentColor')}${l}${id==='sessions'&&todayPending>0?`<span style="margin-left:auto;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px">${todayPending}</span>`:''}</div>`).join('')}
+</div>
+<div style="padding:14px;border-top:1px solid var(--border)">
+<div class="fb" style="gap:8px;margin-bottom:11px"><div style="width:30px;height:30px;border-radius:99px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${u.name[0].toUpperCase()}</div><div style="overflow:hidden;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name)}</div><div style="font-size:11px;color:${u.groqKey?'var(--green)':'var(--mut)'};">${u.groqKey?'Groq ✓':'ARIA-only'}</div></div></div>
+<button class="btn btn-g sm" style="width:100%;justify-content:center" id="lout">${ico('logout',14)} Sign Out</button>
+</div></div>
+<div class="main"><div class="page">${pg}</div></div>`;}
+
+function renderPage(){
+  const p=S.page;
+  if(p==='dashboard')return renderDash();if(p==='tasks')return renderTasks();
+  if(p==='sessions')return renderSessions();if(p==='chat')return renderChat();
+  if(p==='schedule')return renderSchedule();if(p==='stress')return renderStress();
+  if(p==='analytics')return renderAnalytics();if(p==='profile')return renderProfile();
+  return'';
+}
+// ═══════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════
+function renderDash(){
+  const now=new Date(),todayStr=now.toISOString().split('T')[0];
+  const tasks=S.tasks,sessions=S.sessions;
+  const total=tasks.length,done=tasks.filter(t=>t.status==='done').length;
+  const overdue=tasks.filter(t=>t.deadline&&new Date(t.deadline)<now&&t.status!=='done').length;
+  const rate=total?Math.round(done/total*100):0;
+  const st=ARIA.detectStress(tasks,sessions);
+  const sc=st.score<30?'var(--green)':st.score<60?'var(--amber)':'var(--red)';
+  const todaySess=sessions.filter(s=>s.date===todayStr);
+  const todayDone=todaySess.filter(s=>s.status==='done').length;
+  const todayPending=todaySess.filter(s=>s.status!=='done');
+  const todayTotalH=todaySess.reduce((a,s)=>a+(s.duration||0),0);
+  const todayDoneH=todaySess.filter(s=>s.status==='done').reduce((a,s)=>a+(s.duration||0),0);
+  const h=now.getHours();const gr=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  const r=38,ci=2*Math.PI*r,fi=ci*rate/100;
+  const upcoming=tasks.filter(t=>t.status!=='done').sort((a,b)=>new Date(a.deadline||'9999')-new Date(b.deadline||'9999')).slice(0,4);
+  return`<div class="fbb mb-24">
+  <div><h1>${gr}, ${esc(S.user.name.split(' ')[0])} 👋</h1><p style="color:var(--mut);font-size:14px;margin-top:4px">${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</p></div>
+  <button class="btn btn-p sm" data-nav="tasks">${ico('plus',15,'#fff')} New Task</button>
+</div>
+<div class="g4" style="margin-bottom:20px">
+${[{l:'Total Tasks',v:total,s:`${done} completed`,c:'#38bdf8',i:'tasks'},{l:'Today Sessions',v:todaySess.length,s:`${todayDone} done · ${todayPending.length} left`,c:'#34d399',i:'layers'},{l:'Overdue',v:overdue,s:overdue?'Needs attention':'All on track',c:'#f87171',i:'alert'},{l:'Completion',v:rate+'%',s:`${done}/${total} tasks`,c:'#a78bfa',i:'target'}].map(x=>`<div class="sc"><div class="fbb" style="margin-bottom:10px"><div><div style="font-size:13px;color:var(--mut);margin-bottom:5px">${x.l}</div><div style="font-size:28px;font-weight:800;color:${x.c}">${x.v}</div></div><div style="width:38px;height:38px;border-radius:10px;background:${x.c}22;display:flex;align-items:center;justify-content:center">${ico(x.i,20,x.c)}</div></div><div style="font-size:12px;color:var(--mut)">${x.s}</div></div>`).join('')}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:18px;margin-bottom:20px">
+  
+  <div>
+    <div class="fbb" style="margin-bottom:12px"><h2 style="margin:0;font-size:17px">Today's Study Sessions</h2><button class="btn btn-g xs" data-nav="sessions">All Sessions</button></div>
+    ${!todaySess.length?`<div style="padding:20px;background:var(--s2);border:1px solid var(--border);border-radius:10px;text-align:center;color:var(--mut)">
+      <div style="margin-bottom:8px">${ico('layers',32,'var(--border)')}</div>
+      <p style="font-size:14px;margin-bottom:10px">No sessions scheduled for today.</p>
+      <p style="font-size:13px;color:var(--mut)">Add tasks with deadlines + estimated hours and ARIA will auto-generate daily sessions.</p>
+      <button class="btn btn-p sm" style="margin-top:10px" data-nav="tasks">${ico('plus',14,'#fff')} Add Task</button>
+    </div>`:`
+    <div style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15);border-radius:10px;padding:14px">
+      <div class="fbb" style="margin-bottom:10px">
+        <div class="fb" style="gap:8px"><span class="gen-badge">${ico('layers',11,'var(--green)')} Auto-Generated</span></div>
+        <span style="font-size:13px;color:var(--mut)">${todayDoneH.toFixed(1)}h / ${todayTotalH.toFixed(1)}h done</span>
+      </div>
+      <div class="pb" style="margin-bottom:14px"><div class="pf" style="width:${todayTotalH?todayDoneH/todayTotalH*100:0}%;background:var(--green)"></div></div>
+      ${todaySess.map(s=>`
+      <div class="today-sess-item${s.status==='done'?' done-item':''}">
+        <button class="sess-check${s.status==='done'?' done':''}" data-sess="${s.id}" style="width:22px;height:22px;border-radius:6px;border:2px solid ${s.status==='done'?'var(--green)':'var(--border)'};background:${s.status==='done'?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${s.status==='done'?ico('check',12,'#fff'):''}
+        </button>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${s.status==='done'?'text-decoration:line-through;color:var(--mut)':''}">${esc(s.taskTitle)}</div>
+          <div style="font-size:12px;color:var(--mut)">Session ${s.dayNum}/${s.totalDays}${s.taskCourse?' · '+esc(s.taskCourse):''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:15px;font-weight:700;color:${s.status==='done'?'var(--green)':'var(--acc)'}">${s.duration}h</div>
+          <div style="font-size:10px;color:var(--mut)">${s.status==='done'?'✓ done':'pending'}</div>
+        </div>
+      </div>`).join('')}
+    </div>`}
+  </div>
+
+  
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card"><h3 style="margin-bottom:11px">Stress Detector</h3>
+      <div class="fb" style="gap:10px;margin-bottom:8px;align-items:center"><div style="flex:1"><div class="sm2"><div class="sf" style="width:${st.score}%;background:${sc}"></div></div></div><span style="font-weight:700;color:${sc};font-size:14px">${st.score}%</span></div>
+      <div class="fb" style="gap:8px;margin-bottom:5px"><div style="width:7px;height:7px;border-radius:99px;background:${sc}"></div><span style="font-size:13px;color:${sc};font-weight:600">${st.score<30?'Low':st.score<60?'Moderate':'High'}</span></div>
+      ${st.todayH>4?`<div style="margin-top:8px;padding:7px 10px;background:rgba(248,113,113,.07);border-radius:6px;font-size:12px;color:var(--red)">⚠️ ${st.todayH}h sessions today — heavy load</div>`:''}
+      <button class="btn btn-g xs" style="margin-top:10px;width:100%;justify-content:center" data-nav="stress">Full Analysis →</button>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <h3 style="margin-bottom:8px">Progress</h3>
+      <svg width="90" height="90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--s3)" stroke-width="9"/>
+        <circle cx="50" cy="50" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${fi} ${ci}" stroke-dashoffset="${ci/4}" transform="rotate(180 50 50)"/>
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient></defs>
+        <text x="50" y="55" text-anchor="middle" fill="var(--txt)" font-size="18" font-weight="700" font-family="system-ui">${rate}%</text>
+      </svg>
+      <p style="font-size:12px;color:var(--mut);margin-top:4px">${done}/${total} tasks done</p>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,rgba(52,211,153,.05),rgba(56,189,248,.05));border-color:rgba(52,211,153,.2)">
+      <div class="fb" style="gap:8px;margin-bottom:8px"><div class="aa">AR</div><span style="font-size:13px;font-weight:600;color:var(--green)">ARIA</span></div>
+      <p style="font-size:13px;color:var(--mut);line-height:1.6">${todayPending.length?`You have ${todayPending.length} session${todayPending.length>1?'s':''} pending today (${todayPending.reduce((a,s)=>a+(s.duration||0),0)}h). Ask ARIA: "Plan today" for details.`:'Add tasks with estimated hours — ARIA splits them into daily sessions automatically.'}</p>
+      <button class="btn btn-g xs" style="margin-top:9px;width:100%;justify-content:center" data-nav="chat">Chat with ARIA →</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="fbb" style="margin-bottom:12px"><h2 style="margin:0;font-size:17px">Upcoming Deadlines</h2><button class="btn btn-g xs" data-nav="tasks">View All</button></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+${upcoming.length===0?`<div class="card" style="text-align:center;color:var(--mut);padding:28px">No pending tasks.</div>`:''}
+${upcoming.map(t=>{
+  const d=dl(t.deadline);
+  const tSess=sessions.filter(s=>s.taskId===t.id&&s.status!=='done');
+  const dSess=sessions.filter(s=>s.taskId===t.id&&s.status==='done').length;
+  const allSess=sessions.filter(s=>s.taskId===t.id).length;
+  const sessProgress=allSess?Math.round(dSess/allSess*100):0;
+  return`<div class="card" style="border-top:2px solid ${t.priority==='high'?'var(--red)':t.priority==='medium'?'var(--amber)':'var(--green)'}">
+  <div class="fbb" style="margin-bottom:6px">
+    <span style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(t.title)}</span>
+    <span class="badge ${pc(t.priority)}" style="flex-shrink:0;margin-left:8px">${pl(t.priority)}</span>
+  </div>
+  ${t.course?`<div style="font-size:12px;color:var(--mut);margin-bottom:6px">📚 ${esc(t.course)}</div>`:''}
+  <div style="font-size:12px;color:${d!==null&&d<0?'var(--red)':d!==null&&d<=2?'var(--amber)':'var(--mut)'};margin-bottom:8px">
+    ${d===null?'No deadline':d<0?`⚠️ ${Math.abs(d)}d overdue`:d===0?'🔴 Due today':d===1?'🟠 Due tomorrow':`🟡 ${d} days left`}
+  </div>
+  ${allSess?`<div style="margin-bottom:4px"><div class="fbb" style="margin-bottom:3px"><span style="font-size:11px;color:var(--mut)">${dSess}/${allSess} sessions done</span><span style="font-size:11px;color:var(--green)">${sessProgress}%</span></div><div class="pb"><div class="pf" style="width:${sessProgress}%;background:var(--green)"></div></div></div>`:
+  t.estimatedTime?`<div style="font-size:12px;color:var(--mut)">${ico('clock',11,'var(--mut)')} ${t.estimatedTime}h · <span style="color:var(--amber)">Set deadline to auto-schedule</span></div>`:`<div style="font-size:12px;color:var(--mut)">No time estimate set</div>`}
+</div>`;}).join('')}
+</div>`;}
+
+// ═══════════════════════════════════════════════════
+//  TASKS PAGE
+// ═══════════════════════════════════════════════════
+function renderTasks(){
+  const{taskFilter:f,taskSort:s}=S;
+  let tasks=[...S.tasks];
+  if(f==='active')tasks=tasks.filter(t=>t.status!=='done');
+  else if(f==='done')tasks=tasks.filter(t=>t.status==='done');
+  else if(f==='high')tasks=tasks.filter(t=>t.priority==='high'&&t.status!=='done');
+  else if(f==='overdue')tasks=tasks.filter(t=>t.deadline&&new Date(t.deadline)<new Date()&&t.status!=='done');
+  if(s==='score')tasks.sort((a,b)=>ARIA.scoreTask(b)-ARIA.scoreTask(a));
+  else if(s==='deadline')tasks.sort((a,b)=>new Date(a.deadline||'9999')-new Date(b.deadline||'9999'));
+  else if(s==='priority')tasks.sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||2)-({high:0,medium:1,low:2}[b.priority]||2));
+  else tasks.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const all=S.tasks;
+  const cnt={high:all.filter(t=>t.priority==='high'&&t.status!=='done').length,medium:all.filter(t=>t.priority==='medium'&&t.status!=='done').length,low:all.filter(t=>t.priority==='low'&&t.status!=='done').length};
+  return`<div class="fbb mb-24">
+  <div><h1>My Tasks</h1><p style="color:var(--mut);font-size:14px;margin-top:4px">${all.filter(t=>t.status!=='done').length} pending · ${all.filter(t=>t.status==='done').length} completed</p></div>
+  <div class="fb" style="gap:8px"><button class="btn btn-g sm" id="qprio">${ico('zap',14,'var(--green)')} ARIA Prioritize</button><button class="btn btn-p sm" id="atb">${ico('plus',15,'#fff')} New Task</button></div>
+</div>
+<div style="background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:center">
+  <div class="aa" style="flex-shrink:0">AR</div>
+  <p style="font-size:13px;color:var(--mut)"><strong style="color:var(--green)">Smart Session Splitting:</strong> Add a task with a <strong>deadline</strong> and <strong>estimated hours</strong> — ARIA automatically creates daily sessions in the database. Example: 6h task, 6 days = <strong>1h/day</strong>.</p>
+</div>
+<div class="g3" style="margin-bottom:16px">
+${[{k:'high',l:'High',c:'var(--red)'},{k:'medium',l:'Medium',c:'var(--amber)'},{k:'low',l:'Low',c:'var(--green)'}].map(p=>`<div style="background:var(--s2);border:1px solid ${p.c}33;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:99px;background:${p.c}"></div><span style="font-size:13px;color:var(--mut)">${p.l} Priority</span><span style="font-size:22px;font-weight:800;color:${p.c};margin-left:auto">${cnt[p.k]}</span></div>`).join('')}
+</div>
+<div class="fb" style="gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+${[['all','All'],['active','Active'],['done','Done'],['high','High Priority'],['overdue','Overdue']].map(([v,l])=>`<button style="padding:5px 13px;border-radius:99px;border:1px solid ${f===v?'var(--acc)':'var(--border)'};background:${f===v?'rgba(56,189,248,.1)':'transparent'};color:${f===v?'var(--acc)':'var(--mut)'};cursor:pointer;font-size:13px;font-family:inherit" data-fl="${v}">${l}</button>`).join('')}
+<div class="fb" style="margin-left:auto;gap:8px;align-items:center"><span style="font-size:13px;color:var(--mut)">Sort:</span>
+<select class="inp" style="width:140px;padding:5px 10px;font-size:13px" id="tsrt">
+<option value="score"${s==='score'?' selected':''}>ARIA Score</option>
+<option value="deadline"${s==='deadline'?' selected':''}>Deadline</option>
+<option value="priority"${s==='priority'?' selected':''}>Priority</option>
+<option value="created"${s==='created'?' selected':''}>Created</option>
+</select></div>
+</div>
+${!tasks.length?`<div class="card" style="text-align:center;padding:44px;color:var(--mut)">${ico('tasks',40,'var(--border)')}<br><br>No tasks in this view</div>`:''}
+${tasks.map(t=>{
+  const d=dl(t.deadline);
+  const score=ARIA.scoreTask(t);
+  const ov=t.deadline&&new Date(t.deadline)<new Date()&&t.status!=='done';
+  const tSess=S.sessions.filter(s=>s.taskId===t.id);
+  const doneSess=tSess.filter(s=>s.status==='done').length;
+  const allSess=tSess.length;
+  const sessDesc=SessionGen.describe(t);
+  const isExp=S.expandedTask===t.id;
+  return`<div class="card" style="margin-bottom:10px;padding:0;overflow:hidden">
+  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+    <button class="tck" data-id="${t.id}" style="width:22px;height:22px;border-radius:6px;border:2px solid ${t.status==='done'?'var(--green)':'var(--border)'};background:${t.status==='done'?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">${t.status==='done'?ico('check',13,'#fff'):''}</button>
+    <div style="flex:1;overflow:hidden;min-width:0">
+      <div class="fb" style="gap:8px;flex-wrap:wrap;margin-bottom:3px">
+        <span style="font-size:14px;font-weight:500;text-decoration:${t.status==='done'?'line-through':'none'}">${esc(t.title)}</span>
+        <span class="badge ${pc(t.priority)}">${pl(t.priority)}</span>
+        ${ov?'<span class="badge bh">Overdue</span>':''}
+        ${t.status==='in_progress'?'<span class="badge bi">In Progress</span>':''}
+        ${allSess?`<span class="gen-badge">${ico('split',10,'var(--green)')} ${allSess} sessions</span>`:''}
+      </div>
+      <div class="fb" style="gap:12px;font-size:12px;color:var(--mut);flex-wrap:wrap">
+        ${t.course?`<span>📚 ${esc(t.course)}</span>`:''}
+        ${t.deadline?`<span>📅 ${fd(t.deadline)}${d!==null?' ('+( d<0?Math.abs(d)+'d ago':d===0?'today':d===1?'tomorrow':d+'d')+')':''}</span>`:''}
+        ${t.estimatedTime?`<span>⏱ ${esc(t.estimatedTime)}h total</span>`:''}
+        ${sessDesc?`<span style="color:var(--green)">→ ${sessDesc.hpd}h/day × ${sessDesc.daysToUse}d</span>`:''}
+        <span style="color:${score>75?'var(--red)':score>50?'var(--amber)':'var(--mut)'}">Score: ${score}/100</span>
+      </div>
+      ${allSess?`<div style="margin-top:6px"><div class="fbb" style="margin-bottom:3px"><span style="font-size:11px;color:var(--mut)">${doneSess}/${allSess} sessions done</span><span style="font-size:11px;color:var(--green)">${allSess?Math.round(doneSess/allSess*100):0}%</span></div><div class="pb"><div class="pf" style="width:${allSess?doneSess/allSess*100:0}%;background:var(--green)"></div></div></div>`:''}
+    </div>
+    <div class="fb" style="gap:6px;flex-shrink:0">
+      ${allSess?`<button class="btn btn-g xs texp" data-id="${t.id}" title="${isExp?'Hide':'Show'} sessions">${ico(isExp?'chevron_up':'chevron_down',13)}</button>`:''}
+      <button class="btn btn-g xs ted" data-id="${t.id}">${ico('edit',13)}</button>
+      <button class="btn btn-d xs tdl" data-id="${t.id}">${ico('trash',13)}</button>
+    </div>
+  </div>
+  ${isExp&&allSess?`<div style="border-top:1px solid var(--border);padding:12px 16px;background:var(--s1)">
+    <div class="fbb" style="margin-bottom:10px"><span style="font-size:13px;font-weight:600;color:var(--green)">📅 Study Sessions (auto-generated)</span><button class="btn btn-gr xs" id="regen-${t.id}">↺ Regenerate</button></div>
+    ${tSess.map(s=>`<div class="sess-row">
+      <button class="sess-check${s.status==='done'?' done':''} sess-tog" data-sess="${s.id}" style="flex-shrink:0;width:18px;height:18px;border-radius:4px;border:2px solid ${s.status==='done'?'var(--green)':'var(--border)'};background:${s.status==='done'?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer">${s.status==='done'?ico('check',10,'#fff'):''}</button>
+      <span style="font-size:12px;color:var(--mut);min-width:80px">${s.date}</span>
+      <span style="font-size:12px">Day ${s.dayNum}/${s.totalDays}</span>
+      <div class="sess-bar"><div class="sess-fill" style="width:${s.duration/((parseFloat(t.estimatedTime)||1)/tSess.length)*100}%;background:${s.status==='done'?'var(--green)':'var(--acc)'}"></div></div>
+      <span style="font-size:13px;font-weight:600;color:${s.status==='done'?'var(--green)':'var(--acc)'};min-width:32px;text-align:right">${s.duration}h</span>
+      <span style="font-size:10px;color:var(--mut);min-width:48px;text-align:right">${s.status==='done'?'✓ done':'pending'}</span>
+    </div>`).join('')}
+  </div>`:''}
+</div>`;}). join('')}`;}
+
+// ═══════════════════════════════════════════════════
+//  SESSIONS PAGE — All sessions grouped by task
+// ═══════════════════════════════════════════════════
+function renderSessions(){
+  const today=new Date().toISOString().split('T')[0];
+  const allSess=S.sessions;
+  const todaySess=allSess.filter(s=>s.date===today);
+  const upcomingSess=allSess.filter(s=>s.date>today&&s.status!=='done').sort((a,b)=>a.date.localeCompare(b.date));
+  const doneSess=allSess.filter(s=>s.status==='done');
+  const pendingToday=todaySess.filter(s=>s.status!=='done');
+  const doneToday=todaySess.filter(s=>s.status==='done');
+  const todayH=todaySess.reduce((a,s)=>a+(s.duration||0),0);
+  const doneH=doneToday.reduce((a,s)=>a+(s.duration||0),0);
+  // Group upcoming by date
+  const byDate={};
+  upcomingSess.forEach(s=>{if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
+  return`<div class="fbb mb-24">
+  <div><h1>Study Sessions</h1><p style="color:var(--mut);font-size:14px;margin-top:2px">Auto-generated from tasks · Stored in IndexedDB</p></div>
+  <div class="fb" style="gap:8px"><button class="btn btn-g sm" data-nav="tasks">${ico('plus',14)} New Task</button></div>
+</div>
+
+
+<div class="fbb" style="margin-bottom:12px">
+  <h2 style="margin:0;font-size:17px">Today — ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}</h2>
+  <span style="font-size:13px;color:var(--mut)">${doneH.toFixed(1)} / ${todayH.toFixed(1)}h complete</span>
+</div>
+${!todaySess.length?`<div class="card" style="margin-bottom:20px;text-align:center;padding:28px;color:var(--mut)">No sessions for today. <button class="btn btn-p xs" style="margin-left:8px" data-nav="tasks">Add a task with hours + deadline →</button></div>`:`
+<div style="margin-bottom:20px">
+  <div class="pb" style="margin-bottom:12px"><div class="pf" style="width:${todayH?doneH/todayH*100:0}%;background:var(--green)"></div></div>
+  ${todaySess.map(s=>`
+  <div class="today-sess-item${s.status==='done'?' done-item':''}" style="margin-bottom:8px">
+    <button class="sess-tog" data-sess="${s.id}" style="width:24px;height:24px;border-radius:7px;border:2px solid ${s.status==='done'?'var(--green)':'var(--border)'};background:${s.status==='done'?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">${s.status==='done'?ico('check',13,'#fff'):''}</button>
+    <div style="flex:1;overflow:hidden">
+      <div style="font-size:14px;font-weight:500;text-decoration:${s.status==='done'?'line-through':'none'}">${esc(s.taskTitle)}</div>
+      <div style="font-size:12px;color:var(--mut)">Session ${s.dayNum}/${s.totalDays}${s.taskCourse?' · '+esc(s.taskCourse):''}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:18px;font-weight:800;color:${s.status==='done'?'var(--green)':'var(--acc)'}">${s.duration}h</div>
+      <div style="font-size:11px;color:var(--mut)">${s.status==='done'?'✓ done':'pending'}</div>
+    </div>
+  </div>`).join('')}
+</div>`}
+
+
+<div class="fbb" style="margin-bottom:12px"><h2 style="margin:0;font-size:17px">Upcoming Sessions</h2><span style="font-size:13px;color:var(--mut)">${upcomingSess.length} remaining</span></div>
+${!Object.keys(byDate).length?`<div class="card" style="text-align:center;padding:24px;color:var(--mut)">No upcoming sessions. Sessions appear here after you add tasks with deadlines and estimated hours.</div>`:''}
+${Object.entries(byDate).slice(0,7).map(([date,sess])=>{
+  const dObj=new Date(date);const dayName=dObj.toLocaleDateString('en-US',{weekday:'short'});
+  const totalH=sess.reduce((a,s)=>a+(s.duration||0),0);
+  return`<div style="margin-bottom:12px">
+  <div class="fbb" style="margin-bottom:6px"><span style="font-size:13px;font-weight:600">${dayName}, ${fd(date)}</span><span style="font-size:13px;color:var(--mut)">${totalH}h total</span></div>
+  ${sess.map(s=>`<div class="sess-row">
+    <div style="width:8px;height:8px;border-radius:99px;background:var(--acc);flex-shrink:0"></div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:500">${esc(s.taskTitle)}</div><div style="font-size:11px;color:var(--mut)">${s.taskCourse?' '+esc(s.taskCourse)+' ·':''} Session ${s.dayNum}/${s.totalDays}</div></div>
+    <span style="font-size:14px;font-weight:700;color:var(--acc)">${s.duration}h</span>
+  </div>`).join('')}
+  </div>`;}).join('')}
+
+
+${doneSess.length?`<div class="fbb" style="margin-bottom:12px;margin-top:20px"><h2 style="margin:0;font-size:17px">Completed Sessions</h2><span style="font-size:13px;color:var(--green)">${doneSess.length} done · ${doneSess.reduce((a,s)=>a+(s.duration||0),0).toFixed(1)}h total</span></div>
+${doneSess.slice(-8).reverse().map(s=>`<div class="sess-row" style="opacity:.6">
+  <div style="width:8px;height:8px;border-radius:99px;background:var(--green);flex-shrink:0"></div>
+  <div style="flex:1"><div style="font-size:13px;font-weight:500;text-decoration:line-through">${esc(s.taskTitle)}</div><div style="font-size:11px;color:var(--mut)">${fd(s.date)} · Session ${s.dayNum}/${s.totalDays}</div></div>
+  <span style="font-size:14px;font-weight:700;color:var(--green)">${s.duration}h ✓</span>
+</div>`).join('')}`:''}
+`;}
+// ═══════════════════════════════════════════════════
+//  CHAT, SCHEDULE, STRESS, ANALYTICS, PROFILE
+// ═══════════════════════════════════════════════════
+function renderChat(){
+  const hg=!!(S.user.groqKey);
+  const qp=['Plan today','Prioritize my tasks','Show my sessions','Am I stressed?','Plan this week','Study tips','Motivate me','Exam prep tips'];
+  const today=new Date().toISOString().split('T')[0];
+  const todayCount=S.sessions.filter(s=>s.date===today).length;
+  return`<div class="fbb" style="margin-bottom:14px">
+  <div><h1>ARIA Chat</h1><p style="font-size:13px;color:var(--mut)">Session-aware · Lab 4 stress classifier · ${hg?'<span style="color:var(--green)">Groq Llama-3 ✓</span>':'Groq optional'}</p></div>
+  <div class="fb" style="gap:8px"><button class="btn btn-g sm" id="sgk">${ico('settings',14)} ${hg?'Groq Key':'Add Groq (Free)'}</button><button class="btn btn-g sm" id="clr">${ico('trash',14)} Clear</button></div>
+</div>
+<div style="padding:10px 14px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:8px;margin-bottom:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+  <div class="aa" style="flex-shrink:0">AR</div>
+  <span style="font-size:13px;color:var(--mut);flex:1"><strong style="color:var(--green)">ARIA reads your database</strong> — "Plan today" shows real sessions from IndexedDB, not generated text.${todayCount?` You have <strong style="color:var(--acc)">${todayCount} sessions</strong> scheduled today.`:''}</span>
+</div>
+<div style="display:flex;flex-direction:column;height:calc(100vh - 200px)">
+<div class="msgs" id="cmsg">
+${S.msgs.map(m=>`<div class="${m.role==='user'?'mu':'ma'}">
+${m.role==='assistant'?`<div class="mah"><div class="aa">AR</div><span style="font-size:12px;font-weight:700;color:var(--green)">ARIA</span>${m.intent&&m.intent!=='GREETING'&&m.intent!=='FALLBACK'?`<span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(52,211,153,.1);color:var(--green);text-transform:uppercase">${m.intent.replace(/_/g,' ')}</span>`:''}${m.intent==='FALLBACK'?`<span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(251,191,36,.1);color:var(--amber)">GROQ</span>`:''}<span style="font-size:11px;color:var(--mut)">${new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>`:''}
+<div>${md(m.content)}</div>
+${m.xai?`<div class="xb"><strong>${ico('info',11,'var(--green)')} XAI</strong>${md(m.xai)}</div>`:''}
+</div>`).join('')}
+${S.loading?`<div class="ma"><div class="mah"><div class="aa">AR</div><span style="font-size:12px;font-weight:700;color:var(--green)">ARIA</span><span style="font-size:11px;color:var(--mut)">thinking...</span></div><div style="display:flex;gap:5px;margin-top:4px"><span class="td" style="animation-delay:0s"></span><span class="td" style="animation-delay:.25s"></span><span class="td" style="animation-delay:.5s"></span></div></div>`:''}
+</div>
+<div class="fb" style="gap:8px;margin-bottom:8px;flex-wrap:wrap">
+${qp.map(p=>`<button class="chip qp" data-p="${esc(p)}">${p}</button>`).join('')}
+</div>
+<div style="display:flex;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;align-items:center">
+<input style="flex:1;background:none;border:none;outline:none;color:var(--txt);font-size:14px;font-family:inherit" id="ci" placeholder="Ask ARIA about your sessions, tasks, or studies..." ${S.loading?'disabled':''}>
+<button id="cs" style="width:34px;height:34px;border-radius:8px;border:none;background:${S.loading?'var(--s3)':'linear-gradient(135deg,#34d399,#38bdf8)'};display:flex;align-items:center;justify-content:center;cursor:${S.loading?'not-allowed':'pointer'};flex-shrink:0">
+${S.loading?`<div style="width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:99px" class="spin"></div>`:ico('send',15,'#fff')}
+</button></div></div>`;}
+
+function renderSchedule(){
+  const now=new Date(),ws=new Date(now);ws.setDate(now.getDate()-now.getDay()+S.weekOff*7);
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(ws);d.setDate(ws.getDate()+i);return d;});
+  const tc={study:'#38bdf8',exam:'#f87171',assignment:'#fbbf24',break:'#34d399',lecture:'#a78bfa',session:'#34d399',other:'#64748b'};
+  function evDay(d){
+    const ds=d.toISOString().split('T')[0];
+    const evs=S.events.filter(e=>e.date===ds);
+    const taskEvs=S.tasks.filter(t=>t.deadline===ds&&t.status!=='done').map(t=>({id:'td_'+t.id,title:'📅 '+t.title,time:'23:59',type:'assignment',isTask:true,isDeadline:true}));
+    const sessEvs=S.sessions.filter(s=>s.date===ds&&s.status!=='done').map(s=>({id:'se_'+s.id,title:s.taskTitle,time:'09:00',type:'session',isSess:true,duration:s.duration,sessId:s.id,sessStatus:s.status}));
+    return[...evs,...sessEvs,...taskEvs].sort((a,b)=>a.time.localeCompare(b.time));
+  }
+  const upcoming=S.events.filter(e=>new Date(e.date)>=new Date(now.toDateString())).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  return`<div class="fbb mb-24">
+  <div><h1>Schedule</h1><p style="color:var(--mut);font-size:14px">Weekly view · Auto-sessions shown in green · Task deadlines marked</p></div>
+  <div class="fb" style="gap:8px"><button class="btn btn-g sm" id="pw">←</button><button class="btn btn-g sm" id="td">Today</button><button class="btn btn-g sm" id="nw">→</button><button class="btn btn-p sm" id="aev">${ico('plus',15,'#fff')} Add Event</button></div>
+</div>
+<div style="display:flex;gap:14px;margin-bottom:10px;font-size:12px">
+  ${[['#34d399','Auto Session'],['#fbbf24','Task Deadline'],['#38bdf8','Study Event'],['#f87171','Exam']].map(([c,l])=>`<div class="fb" style="gap:5px"><div style="width:8px;height:8px;border-radius:3px;background:${c}"></div><span style="color:var(--mut)">${l}</span></div>`).join('')}
+</div>
+<div class="wg" style="margin-bottom:20px">
+${days.map((d,i)=>{const it=d.toDateString()===now.toDateString();const evs=evDay(d);return`<div>
+<div class="wdh" style="${it?'background:rgba(52,211,153,.08)':''}"><div style="font-size:11px;color:var(--mut)">${'Sun Mon Tue Wed Thu Fri Sat'.split(' ')[i]}</div><div style="font-size:18px;font-weight:700;${it?'color:var(--green)':''}">${d.getDate()}</div>${it?'<div style="width:5px;height:5px;border-radius:99px;background:var(--green);margin:3px auto 0"></div>':''}</div>
+<div class="wdb" style="${it?'background:rgba(52,211,153,.02)':''}">
+${evs.map(ev=>`<div class="we" style="background:${(tc[ev.type]||'#64748b')}22;color:${tc[ev.type]||'#64748b'}" ${ev.isSess?`data-sess="${ev.sessId}" title="Click to mark done"`:!ev.isTask&&!ev.isSess?`data-dev="${ev.id}" title="Click to delete"`:''}>${ev.isSess?`${ev.duration}h: `:ev.isDeadline?'DL: ':''}${esc(ev.title)}</div>`).join('')}
+${!evs.length?`<div style="font-size:10px;color:var(--border);text-align:center;padding-top:12px">—</div>`:''}
+</div></div>`;}).join('')}
+</div>
+<h2 style="margin-bottom:12px">Upcoming Events</h2>
+${!upcoming.length?`<div class="card" style="text-align:center;padding:24px;color:var(--mut)">No custom events. Auto-sessions appear directly on the calendar above.</div>`:''}
+<div style="display:flex;flex-direction:column;gap:8px">
+${upcoming.map(ev=>`<div class="card" style="display:flex;align-items:center;gap:13px;padding:11px 16px"><div style="width:10px;height:10px;border-radius:99px;background:${tc[ev.type]||'#64748b'};flex-shrink:0"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">${esc(ev.title)}</div><div style="font-size:12px;color:var(--mut)">${fd(ev.date)} · ${esc(ev.time)} · ${ev.duration}min</div></div><span class="tag" style="background:${tc[ev.type]||'#64748b'}22;color:${tc[ev.type]||'#64748b'}">${esc(ev.type)}</span><button class="btn btn-d xs" data-dev="${ev.id}">${ico('trash',12)}</button></div>`).join('')}
+</div>`;}
+
+function renderStress(){
+  const tasks=S.tasks,sessions=S.sessions,now=new Date();
+  const ov=tasks.filter(t=>t.deadline&&new Date(t.deadline)<now&&t.status!=='done').length;
+  const i48=tasks.filter(t=>{if(!t.deadline||t.status==='done')return false;const h=(new Date(t.deadline)-Date.now())/3600000;return h>=0&&h<=48;}).length;
+  const today=now.toISOString().split('T')[0];
+  const todayH=sessions.filter(s=>s.date===today&&s.status!=='done').reduce((a,s)=>a+(s.duration||0),0);
+  const r=S.stressRes;
+  return`<div style="margin-bottom:24px"><h1>Stress Detector</h1><p style="color:var(--mut);font-size:14px">ARIA's Lab 4 classifier + session load awareness · F1=0.762</p></div>
+<div class="g2" style="margin-bottom:20px">
+<div class="card"><h3>Workload Input</h3>
+${[{id:'sd',label:'Deadlines in 48h',threshold:'≥3 = HIGH',color:'var(--amber)',vid:'dv',auto:i48},{id:'so',label:'Overdue Tasks',threshold:'≥2 = HIGH',color:'var(--red)',vid:'ov',auto:ov},{id:'sh',label:"Today's Session Hours",threshold:'>4h = HIGH',color:'var(--acc)',vid:'hv',auto:todayH}].map(x=>`<div style="margin-bottom:18px"><div class="fbb" style="margin-bottom:7px"><label style="font-size:13px;margin:0">${x.label} <span style="font-size:11px;color:var(--mut)">(${x.threshold})</span></label><span style="font-weight:700;color:${x.color};font-size:18px" id="${x.vid}">${typeof x.auto==='number'?x.auto.toFixed(x.auto%1?1:0):x.auto}</span></div><input type="range" min="0" max="${x.id==='sh'?10:10}" step="${x.id==='sh'?0.5:1}" value="${x.auto}" id="${x.id}" style="width:100%;accent-color:${x.color}"><div style="font-size:11px;color:var(--mut);margin-top:3px">Auto-detected: ${typeof x.auto==='number'?x.auto.toFixed(x.auto%1?1:0):x.auto}</div></div>`).join('')}
+<button class="btn btn-p" style="width:100%;justify-content:center" id="rstr">${ico('zap',15,'#fff')} Run Analysis</button>
+</div>
+<div class="card"><h3>ARIA Prediction</h3>
+${!r?`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px;color:var(--mut)"><div class="aa" style="width:48px;height:48px;font-size:18px;border-radius:12px">AR</div><p style="margin-top:12px;font-size:14px">Run the analysis</p></div>`:`
+<div style="text-align:center;padding:18px;background:${r.isHigh?'rgba(248,113,113,.08)':'rgba(52,211,153,.08)'};border-radius:10px;border:1px solid ${r.isHigh?'rgba(248,113,113,.2)':'rgba(52,211,153,.2)'};margin-bottom:14px">
+<div style="font-size:40px;margin-bottom:6px">${r.isHigh?'⚠️':'✅'}</div>
+<div style="font-size:22px;font-weight:800;color:${r.isHigh?'var(--red)':'var(--green)'}">${r.isHigh?'HIGH STRESS':'MANAGEABLE'}</div>
+<div style="font-size:13px;color:var(--mut);margin-top:4px">Score: ${r.score}/100</div>
+</div>
+<div class="g3" style="gap:8px;margin-bottom:12px">
+${[{l:'Deadlines/48h',v:r.dl,t:3,fmt:v=>v},{l:'Overdue',v:r.od,t:2,fmt:v=>v},{l:"Today's Hours",v:r.sh,t:4,fmt:v=>v+'h'}].map(x=>`<div style="text-align:center;padding:10px;background:var(--s1);border-radius:8px"><div style="font-size:20px;font-weight:800;color:${x.v>=x.t?'var(--red)':'var(--green)'}">${x.fmt(x.v)}</div><div style="font-size:11px;color:var(--mut)">${x.l}</div><div style="font-size:10px;color:${x.v>=x.t?'var(--red)':'var(--mut)'}">≥${x.t}</div></div>`).join('')}
+</div>
+<div class="xb"><strong>XAI — Rules</strong>HIGH if overdue≥2 OR in48h≥3 OR today_sessions>4h<br>Score=overdue×20+in48h×15+high×10+overload×15</div>
+${r.isHigh?`<div style="margin-top:10px;padding:10px 12px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.15);border-radius:8px;font-size:13px;color:var(--mut);line-height:1.7"><strong style="color:var(--acc);display:block;margin-bottom:4px">💡 Actions</strong>• Check Sessions page → mark done what's complete<br>• Reschedule low-priority sessions<br>• Pomodoro: 25min focus, 5min break<br>• Ask ARIA: "Plan today"</div>`:''}
+`}
+</div></div>
+<h2 style="margin-bottom:14px">Model Performance</h2>
+<div class="g2">
+</div>
+<div class="card"><h3>Metrics</h3>
+${[{l:'Precision',v:'0.727',f:'',c:'#38bdf8'},{l:'Recall',v:'0.800',f:'',c:'#34d399'},{l:'F1 Score',v:'0.762',f:'',c:'#a78bfa'}].map(x=>`<div style="padding:11px 12px;background:var(--s1);border-radius:8px;margin-bottom:9px"><div class="fbb" style="margin-bottom:3px"><span style="font-weight:700;color:${x.c}">${x.l}</span><span style="font-size:20px;font-weight:800;color:${x.c}">${x.v}</span></div><div style="font-size:11px;color:var(--acc);font-family:monospace;margin-bottom:3px">${x.f}</div><div class="pb" style="margin-top:5px"><div class="pf" style="width:${parseFloat(x.v)*100}%;background:${x.c}"></div></div></div>`).join('')}
+</div></div>`;}
+
+function renderAnalytics(){
+  const tasks=S.tasks,sessions=S.sessions;
+  const done=tasks.filter(t=>t.status==='done').length,total=tasks.length;
+  const ov=tasks.filter(t=>t.deadline&&new Date(t.deadline)<new Date()&&t.status!=='done').length;
+  const rate=total?Math.round(done/total*100):0;
+  const estH=tasks.reduce((a,t)=>a+(parseFloat(t.estimatedTime)||0),0);
+  const doneSessH=sessions.filter(s=>s.status==='done').reduce((a,s)=>a+(s.duration||0),0);
+  const pendSessH=sessions.filter(s=>s.status!=='done').reduce((a,s)=>a+(s.duration||0),0);
+  const byP={high:tasks.filter(t=>t.priority==='high').length,medium:tasks.filter(t=>t.priority==='medium').length,low:tasks.filter(t=>t.priority==='low').length};
+  const byCourse={};tasks.forEach(t=>{const c=t.course||'Uncategorized';byCourse[c]=(byCourse[c]||0)+1;});
+  const courses=Object.entries(byCourse).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxC=Math.max(...courses.map(e=>e[1]),1);
+  const segs=[{val:done,c:'#34d399'},{val:Math.max(0,total-done-ov),c:'#38bdf8'},{val:ov,c:'#f87171'}];
+  const r2=50,cx=60,cy=60;let ang=-Math.PI/2;
+  const dpaths=total===0?'':segs.filter(s=>s.val>0).map(s=>{const pct=s.val/total,a1=ang,a2=ang+pct*2*Math.PI,x1=cx+r2*Math.cos(a1),y1=cy+r2*Math.sin(a1),x2=cx+r2*Math.cos(a2),y2=cy+r2*Math.sin(a2),lg=pct>0.5?1:0;ang=a2;return`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r2},${r2} 0 ${lg} 1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${s.c}" opacity=".85"/>`;}).join('');
+  return`<div style="margin-bottom:24px"><h1>Analytics</h1><p style="color:var(--mut);font-size:14px">Task + session performance overview</p></div>
+<div class="g4" style="margin-bottom:20px">${[{l:'Total Tasks',v:total,c:'#38bdf8'},{l:'Total Sessions',v:sessions.length,c:'#34d399'},{l:'Hours Done',v:doneSessH.toFixed(1)+'h',c:'#a78bfa'},{l:'Hours Left',v:pendSessH.toFixed(1)+'h',c:'#fbbf24'}].map(x=>`<div class="sc"><div style="font-size:28px;font-weight:800;color:${x.c};margin-bottom:4px">${x.v}</div><div style="font-size:13px;color:var(--mut)">${x.l}</div></div>`).join('')}</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card"><h3>Task Status</h3>
+<div class="fb" style="gap:20px;align-items:center;margin-top:8px">
+<svg width="120" height="120" viewBox="0 0 120 120">${total===0?`<circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="10"/>`:''}${dpaths}<circle cx="${cx}" cy="${cy}" r="32" fill="var(--s2)"/><text x="${cx}" y="${cy+6}" text-anchor="middle" fill="var(--txt)" font-size="18" font-weight="700" font-family="system-ui">${rate}%</text></svg>
+<div style="display:flex;flex-direction:column;gap:10px">${[{l:'Completed',v:done,c:'#34d399'},{l:'Active',v:total-done-ov,c:'#38bdf8'},{l:'Overdue',v:ov,c:'#f87171'}].map(x=>`<div class="fb" style="gap:8px;align-items:center"><div style="width:10px;height:10px;border-radius:3px;background:${x.c};flex-shrink:0"></div><span style="font-size:13px;color:var(--mut)">${x.l}</span><span style="font-size:17px;font-weight:800;color:${x.c};margin-left:auto">${x.v}</span></div>`).join('')}</div>
+</div></div>
+<div class="card"><h3>Session Progress</h3>
+<div style="margin-bottom:16px">
+<div class="fbb" style="margin-bottom:6px"><span style="font-size:13px">Sessions completed</span><span style="font-weight:700;color:var(--green)">${sessions.filter(s=>s.status==='done').length}/${sessions.length}</span></div>
+<div class="pb"><div class="pf" style="width:${sessions.length?sessions.filter(s=>s.status==='done').length/sessions.length*100:0}%;background:var(--green)"></div></div>
+</div>
+<div style="margin-bottom:12px">
+<div class="fbb" style="margin-bottom:6px"><span style="font-size:13px">Hours completed</span><span style="font-weight:700;color:var(--acc)">${doneSessH.toFixed(1)}h / ${estH.toFixed(1)}h</span></div>
+<div class="pb"><div class="pf" style="width:${estH?doneSessH/estH*100:0}%;background:var(--acc)"></div></div>
+</div>
+<div style="padding:10px 12px;background:var(--s1);border-radius:8px">
+<div class="fbb"><span style="font-size:13px;color:var(--mut)">Hours remaining</span><span style="font-weight:700;color:var(--amber)">${pendSessH.toFixed(1)}h</span></div>
+<div class="fbb" style="margin-top:4px"><span style="font-size:13px;color:var(--mut)">Avg session length</span><span style="font-weight:700">${sessions.length?(sessions.reduce((a,s)=>a+(s.duration||0),0)/sessions.length).toFixed(1)+'h':'N/A'}</span></div>
+</div></div>
+</div>
+<div class="card" style="margin-bottom:16px"><h3>Tasks by Course</h3>
+${!courses.length?`<p style="color:var(--mut);font-size:13px;padding:10px 0">Add course names to tasks.</p>`:''}
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${courses.map(([c,n],i)=>`<div class="fb" style="gap:12px;align-items:center"><span style="font-size:13px;min-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c)}</span><div style="flex:1;height:20px;background:var(--s1);border-radius:5px;overflow:hidden;position:relative"><div style="width:${n/maxC*100}%;height:100%;background:hsl(${i*50+160},55%,52%);border-radius:5px"></div><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:600">${n}</span></div></div>`).join('')}</div></div>
+<div class="card" style="background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(56,189,248,.04))"><h3>Research Insights</h3>
+<div class="g4" style="margin-top:10px">${[{v:'46%',l:'Would use daily'},{v:'82%',l:'Want auto-prioritization'},{v:'74%',l:'Want adaptive scheduling'},{v:'4.2/5',l:'Ease of use score'}].map(x=>`<div style="text-align:center;padding:11px;background:var(--s1);border-radius:8px"><div class="gt2" style="font-size:20px;font-weight:800;margin-bottom:3px">${x.v}</div><div style="font-size:12px;color:var(--mut)">${x.l}</div></div>`).join('')}</div></div>`;}
+
+function renderProfile(){
+  const u=S.user;
+  return`<div style="margin-bottom:24px"><h1>Settings</h1></div>
+${S.saved?`<div style="padding:10px 14px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:8px;color:var(--green);font-size:14px;margin-bottom:16px">✓ Saved</div>`:''}
+<div class="g2">
+<div>
+<div class="card" style="margin-bottom:16px">
+<div class="fb" style="gap:14px;margin-bottom:20px"><div style="width:50px;height:50px;border-radius:99px;background:linear-gradient(135deg,#34d399,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0">${u.name[0].toUpperCase()}</div><div><div style="font-size:17px;font-weight:700">${esc(u.name)}</div><div style="color:var(--mut);font-size:13px">${esc(u.email)}</div><div style="font-size:12px;color:var(--green);margin-top:2px">✓ ARIA + IndexedDB Active</div></div></div>
+<div class="fg"><label>Full Name</label><input class="inp" id="pfn" value="${esc(u.name)}"></div>
+<div class="fg"><label>Email</label><input class="inp" id="pfe" type="email" value="${esc(u.email)}"></div>
+<button class="btn btn-p" style="width:100%;justify-content:center" id="svp">Save Changes</button>
+</div>
+</div>
+<div>
+<div class="card" style="margin-bottom:16px;border-color:rgba(52,211,153,.2)">
+<h3 style="color:var(--green)">Groq API Key <span class="tag" style="background:rgba(251,191,36,.1);color:var(--amber);margin-left:8px">Optional · Free</span></h3>
+<p style="font-size:13px;color:var(--mut);margin-bottom:12px;line-height:1.6">For open-ended questions. Free key at <a href="https:
+<div class="fg"><label>Groq API Key</label><input class="inp" id="pfg" type="password" placeholder="gsk_..." value="${esc(u.groqKey||'')}"></div>
+<button class="btn btn-p" style="width:100%;justify-content:center" id="svg">Save Groq Key</button>
+</div>
+<div class="card" style="border-color:rgba(248,113,113,.2)">
+<h3 style="color:var(--red)">Danger Zone</h3>
+<p style="font-size:13px;color:var(--mut);margin-bottom:11px">Delete all tasks, sessions, events, and chat history.</p>
+<button class="btn btn-d sm" id="deld">Delete All My Data</button>
+</div>
+</div></div>
+<div class="card" style="margin-top:16px;background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(56,189,248,.04))">
+<h3>About StudyAI + ARIA</h3>
+<div class="g3" style="margin-top:10px">${[{l:'Student',v:'Ruslan Baidayev'},{l:'University',v:'KBTU, Almaty'},{l:'Course',v:'Field Projects for IS'}].map(x=>`<div style="padding:10px;background:var(--s1);border-radius:8px"><div style="font-size:12px;color:var(--mut);margin-bottom:3px">${x.l}</div><div style="font-size:13px;font-weight:600">${x.v}</div></div>`).join('')}</div>
+<p style="font-size:13px;color:var(--mut);margin-top:12px;line-height:1.7">Smart Session Generator splits tasks into daily sessions (e.g. 6h task in 6 days = 1h/day). Sessions stored in IndexedDB with localStorage fallback. ARIA is a custom AI engine (14 NLP intents, Lab 4 stress classifier F1=0.762, priority formula from Lab 3 data n=54). Groq Llama-3 handles open-ended questions for free.</p>
+</div>`;}
+// ═══════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════
+function renderModal(){
+  const m=S.modal;if(!m)return;
+  let c='';
+  if(m.type==='task')c=mTask(m.data);
+  else if(m.type==='event')c=mEvent();
+  else if(m.type==='groq')c=mGroq();
+  else if(m.type==='del')c=mDel();
+  const ex=document.querySelector('.mo');if(ex)ex.remove();
+  const w=document.createElement('div');w.className='mo';
+  w.innerHTML=`<div class="modal">${c}</div>`;
+  document.body.appendChild(w);
+  w.addEventListener('click',e=>{if(e.target===w){S.modal=null;w.remove();}});
+  aMod(m.type);
+}
+function mTask(t){
+  const ie=!!t?.id;
+  const desc=t?SessionGen.describe(t):null;
+  return`<div class="fbb" style="margin-bottom:16px"><h2 style="margin:0">${ie?'Edit Task':'New Task'}</h2><button class="btn btn-g xs mc">${ico('x',16)}</button></div>
+${!ie?`<div style="padding:10px 13px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:8px;margin-bottom:14px;font-size:13px;color:var(--mut)"><strong style="color:var(--green)">Smart Session Splitting:</strong> Fill in deadline + estimated hours — ARIA automatically creates daily sessions. Example: 6h task, 6 days = <strong>1h/day</strong>.</div>`:''}
+<div class="fg"><label>Title *</label><input class="inp" id="mt" placeholder="e.g. Write Research Report" value="${esc(t?.title||'')}"></div>
+<div class="g2"><div class="fg"><label>Course</label><input class="inp" id="mc" placeholder="e.g. CS2105" value="${esc(t?.course||'')}"></div><div class="fg"><label>Deadline</label><input class="inp" id="md" type="date" value="${esc(t?.deadline||'')}"></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+<div class="fg"><label>Priority</label><select class="inp" id="mp"><option value="high"${(t?.priority||'medium')==='high'?' selected':''}>High</option><option value="medium"${(t?.priority||'medium')==='medium'?' selected':''}>Medium</option><option value="low"${(t?.priority||'medium')==='low'?' selected':''}>Low</option></select></div>
+<div class="fg"><label>Status</label><select class="inp" id="ms"><option value="todo"${(t?.status||'todo')==='todo'?' selected':''}>To Do</option><option value="in_progress"${t?.status==='in_progress'?' selected':''}>In Progress</option><option value="done"${t?.status==='done'?' selected':''}>Done</option></select></div>
+<div class="fg"><label>Est. Hours *</label><input class="inp" id="mh" type="number" placeholder="e.g. 6" min="0.5" step="0.5" value="${esc(t?.estimatedTime||'')}"></div>
+</div>
+<div id="sess-preview" style="margin-bottom:14px"></div>
+<div class="fg"><label>Notes</label><textarea class="inp" id="mn" placeholder="Additional notes...">${esc(t?.notes||'')}</textarea></div>
+<div class="fb" style="gap:8px;justify-content:flex-end;margin-top:8px">
+<button class="btn btn-g mc">Cancel</button>
+<button class="btn btn-p" id="svt" data-id="${esc(t?.id||'')}">${ie?'Save & Regenerate Sessions':'Add Task + Generate Sessions'}</button>
+</div>`;}
+function mEvent(){
+  const today=new Date().toISOString().split('T')[0];
+  return`<div class="fbb" style="margin-bottom:16px"><h2 style="margin:0">Add Event</h2><button class="btn btn-g xs mc">${ico('x',16)}</button></div>
+<div class="fg"><label>Title *</label><input class="inp" id="et" placeholder="e.g. Lecture — Algorithms"></div>
+<div class="g2"><div class="fg"><label>Date *</label><input class="inp" id="ed" type="date" value="${today}"></div><div class="fg"><label>Time</label><input class="inp" id="eti" type="time" value="09:00"></div></div>
+<div class="g2"><div class="fg"><label>Duration (min)</label><input class="inp" id="edu" type="number" value="60" min="15" step="15"></div><div class="fg"><label>Type</label><select class="inp" id="ety"><option value="study">Study Session</option><option value="lecture">Lecture</option><option value="exam">Exam</option><option value="assignment">Assignment</option><option value="break">Break</option><option value="other">Other</option></select></div></div>
+<div class="fb" style="gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-g mc">Cancel</button><button class="btn btn-p" id="sve">Add Event</button></div>`;}
+function mGroq(){
+  return`<div class="fbb" style="margin-bottom:16px"><h2 style="margin:0">Groq API Key</h2><button class="btn btn-g xs mc">${ico('x',16)}</button></div>
+<div style="padding:12px 14px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:8px;margin-bottom:16px"><strong style="color:var(--green);display:block;margin-bottom:4px">ARIA works without this</strong><p style="font-size:13px;color:var(--mut);line-height:1.6">For open-ended questions via Llama-3. Free at <a href="https://console.groq.com" target="_blank" style="color:var(--acc)">console.groq.com</a>.</p></div>
+<div class="fg"><label>Groq API Key</label><input class="inp" id="gki" type="password" placeholder="gsk_..." value="${esc(S.user.groqKey||'')}"></div>
+<div class="fb" style="gap:8px;justify-content:flex-end"><button class="btn btn-g mc">Cancel</button><button class="btn btn-p" id="sgks">Save Key</button></div>`;}
+function mDel(){
+  return`<div class="fbb" style="margin-bottom:16px"><h2 style="margin:0;color:var(--red)">Delete All Data</h2><button class="btn btn-g xs mc">${ico('x',16)}</button></div>
+<p style="font-size:13px;color:var(--mut);margin-bottom:16px;line-height:1.6">Permanently deletes all tasks, sessions, events, and chat history from IndexedDB. <strong>Cannot be undone.</strong></p>
+<div class="fb" style="gap:8px;justify-content:flex-end"><button class="btn btn-g mc">Cancel</button><button class="btn btn-d" id="cda">Yes, Delete Everything</button></div>`;}
+
+// ═══════════════════════════════════════════════════
+//  EVENT HANDLERS
+// ═══════════════════════════════════════════════════
+function aLanding(){
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{S.page=b.dataset.go;render();}));
+}
+function aAuth(){
+  const sub=document.getElementById('asub');
+  const err=msg=>{const e=document.getElementById('aerr');if(e){e.textContent=msg;e.style.display='block';}};
+  sub?.addEventListener('click',async()=>{
+    const isR=S.page==='register';
+    const name=isR?document.getElementById('an')?.value.trim():null;
+    const email=document.getElementById('ae')?.value.trim();
+    const pw=document.getElementById('ap')?.value;
+    if(isR&&!name){err('Name is required');return;}
+    if(!email){err('Email is required');return;}
+    if(!pw||pw.length<4){err('Password must be at least 4 characters');return;}
+    try{
+      if(isR){
+        const existing=Users.find(email);
+        if(existing){err('Email already registered');return;}
+        const user={id:uid2(),name,email,passwordHash:await Auth.hashPassword(pw),groqKey:'',preferences:{notifications:true},createdAt:Date.now()};
+        Users.save(user);S.user=user;
+        await loadData();S.page='dashboard';render();
+      }else{
+        const user=Users.find(email);
+        const authed=await Auth.authenticate(user,pw);
+        if(!authed){err('Invalid email or password');return;}
+        Users.save(authed);S.user=authed;
+        await loadData();S.page='dashboard';render();
+      }
+    }catch(e){err(e.message||'Authentication failed');}
+  });
+  document.getElementById('asw')?.addEventListener('click',()=>{S.page=S.page==='login'?'register':'login';render();});
+  document.querySelectorAll('[data-go="landing"]').forEach(b=>b.addEventListener('click',()=>{S.page='landing';render();}));
+  ['ae','ap','an'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter')sub?.click();}));
+}
+function aLayout(){
+  document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{S.page=b.dataset.nav;render();}));
+  document.getElementById('lout')?.addEventListener('click',()=>{
+    Users.clearCurrent();S.user=null;S.tasks=[];S.sessions=[];S.events=[];S.msgs=[];S.page='landing';render();
+  });
+}
+function aPage(){
+  document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{S.page=b.dataset.nav;render();}));
+  const p=S.page;
+  if(p==='dashboard')aDash();
+  else if(p==='tasks')aTasks();
+  else if(p==='sessions')aSessions();
+  else if(p==='chat')aChat();
+  else if(p==='schedule')aSched();
+  else if(p==='stress')aStress();
+  else if(p==='profile')aProfile();
+}
+function aDash(){
+  // Session checkboxes on dashboard
+  document.querySelectorAll('.sess-check[data-sess]').forEach(b=>b.addEventListener('click',async()=>{
+    await toggleSession(b.dataset.sess);
+  }));
+}
+function aTasks(){
+  document.getElementById('atb')?.addEventListener('click',()=>{S.modal={type:'task',data:null};renderModal();});
+  document.getElementById('qprio')?.addEventListener('click',()=>{S.page='chat';render();setTimeout(()=>{const i=document.getElementById('ci');if(i){i.value='Prioritize my tasks';document.getElementById('cs')?.click();}},300);});
+  document.querySelectorAll('[data-fl]').forEach(b=>b.addEventListener('click',()=>{S.taskFilter=b.dataset.fl;render();}));
+  document.getElementById('tsrt')?.addEventListener('change',e=>{S.taskSort=e.target.value;render();});
+  document.querySelectorAll('.tck').forEach(b=>b.addEventListener('click',async()=>{
+    const t=S.tasks.find(x=>x.id===b.dataset.id);
+    if(!t)return;
+    const newStatus=t.status==='done'?'todo':'done';
+    const updated={...t,status:newStatus};
+    await saveTask(updated);
+  }));
+  document.querySelectorAll('.ted').forEach(b=>b.addEventListener('click',()=>{
+    const t=S.tasks.find(x=>x.id===b.dataset.id);
+    if(t){S.modal={type:'task',data:{...t}};renderModal();}
+  }));
+  document.querySelectorAll('.tdl').forEach(b=>b.addEventListener('click',async()=>{
+    await deleteTask(b.dataset.id);render();
+  }));
+  document.querySelectorAll('.texp').forEach(b=>b.addEventListener('click',()=>{
+    S.expandedTask=S.expandedTask===b.dataset.id?null:b.dataset.id;render();
+  }));
+  document.querySelectorAll('.sess-tog').forEach(b=>b.addEventListener('click',async()=>{
+    await toggleSession(b.dataset.sess);
+  }));
+  document.querySelectorAll('[id^="regen-"]').forEach(btn=>{
+    const tid=btn.id.replace('regen-','');
+    btn.addEventListener('click',async()=>{
+      const t=S.tasks.find(x=>x.id===tid);
+      if(t){await saveTask(t);render();}
+    });
+  });
+}
+function aSessions(){
+  document.querySelectorAll('.sess-tog').forEach(b=>b.addEventListener('click',async()=>{
+    await toggleSession(b.dataset.sess);
+  }));
+}
+function aChat(){
+  const inp=document.getElementById('ci'),snd=document.getElementById('cs');
+  document.getElementById('sgk')?.addEventListener('click',()=>{S.modal={type:'groq'};renderModal();});
+  document.getElementById('clr')?.addEventListener('click',async()=>{
+    await DB.clearMsgs(S.user.id);
+    const m={id:uid2(),role:'assistant',intent:'GREETING',content:ARIA.greet(S.user.name,S.tasks,S.sessions),userId:S.user.id,ts:Date.now()};
+    await DB.saveMsg(m);S.msgs=[m];render();scrl();
+  });
+  document.querySelectorAll('.qp').forEach(b=>b.addEventListener('click',()=>{if(inp)inp.value=b.dataset.p;inp?.focus();}));
+  const send=async()=>{
+    const text=inp?.value.trim();
+    if(!text||S.loading)return;
+    const um={id:uid2(),role:'user',content:text,userId:S.user.id,ts:Date.now()};
+    await DB.saveMsg(um);S.msgs.push(um);
+    if(inp)inp.value='';
+    S.loading=true;render();scrl();
+    await new Promise(r=>setTimeout(r,320));
+    try{
+      const intent=ARIA.classify(text);
+      if(intent!=='FALLBACK'){
+        const res=ARIA.handle(intent,text,S.tasks,S.sessions,S.user.name);
+        if(res){
+          const am={id:uid2(),role:'assistant',intent,content:res.content,xai:res.xai,userId:S.user.id,ts:Date.now()};
+          await DB.saveMsg(am);S.msgs.push(am);
+          S.loading=false;render();scrl();return;
+        }
+      }
+      if(S.user.groqKey){
+        try{
+          const resp=await callGroq(S.msgs.filter(m=>m.role!=='system'),S.tasks,S.user.name);
+          const am={id:uid2(),role:'assistant',intent:'FALLBACK',content:resp,xai:null,userId:S.user.id,ts:Date.now()};
+          await DB.saveMsg(am);S.msgs.push(am);
+        }catch(e){
+          const msg=e.message==='NO_KEY'?fallbackMsg():(`⚠️ Groq error: ${e.message}`);
+          const am={id:uid2(),role:'assistant',intent:'FALLBACK',content:msg,xai:null,userId:S.user.id,ts:Date.now()};
+          await DB.saveMsg(am);S.msgs.push(am);
+        }
+      }else{
+        const am={id:uid2(),role:'assistant',intent:'FALLBACK',content:fallbackMsg(),xai:null,userId:S.user.id,ts:Date.now()};
+        await DB.saveMsg(am);S.msgs.push(am);
+      }
+    }catch(e){
+      const am={id:uid2(),role:'assistant',intent:'FALLBACK',content:`⚠️ Error: ${e.message}`,xai:null,userId:S.user.id,ts:Date.now()};
+      await DB.saveMsg(am);S.msgs.push(am);
+    }
+    S.loading=false;render();scrl();
+  };
+  snd?.addEventListener('click',send);
+  inp?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+  scrl();
+}
+function fallbackMsg(){
+  return`I can help with these specific questions:\n\n- **"Plan today"** — shows your real scheduled sessions\n- **"Prioritize my tasks"** — ARIA scoring formula\n- **"Show my sessions"** — all study sessions from DB\n- **"Am I stressed?"** — Lab 4 classifier\n- **"Plan this week"** — sessions grouped by day\n- **"Study tips"**, **"Motivate me"**, **"Exam prep tips"**\n- **"Time estimate"** — hours analysis\n- **"What's due soon?"** — deadline overview\n\nFor open-ended questions, add a free **Groq key** in Settings → console.groq.com (2 minutes).`;
+}
+function scrl(){setTimeout(()=>{const e=document.getElementById('cmsg');if(e)e.scrollTop=e.scrollHeight;},60);}
+function aSched(){
+  document.getElementById('pw')?.addEventListener('click',()=>{S.weekOff--;render();});
+  document.getElementById('nw')?.addEventListener('click',()=>{S.weekOff++;render();});
+  document.getElementById('td')?.addEventListener('click',()=>{S.weekOff=0;render();});
+  document.getElementById('aev')?.addEventListener('click',()=>{S.modal={type:'event'};renderModal();});
+  document.querySelectorAll('[data-dev]').forEach(b=>b.addEventListener('click',async e=>{
+    e.stopPropagation();await DB.deleteEvent(b.dataset.dev);
+    S.events=S.events.filter(ev=>ev.id!==b.dataset.dev);render();
+  }));
+  // Session toggle from calendar
+  document.querySelectorAll('[data-sess]').forEach(b=>b.addEventListener('click',async()=>{
+    await toggleSession(b.dataset.sess);
+  }));
+}
+function aStress(){
+  const sd=document.getElementById('sd'),so=document.getElementById('so'),sh=document.getElementById('sh');
+  sd?.addEventListener('input',()=>{document.getElementById('dv').textContent=sd.value;});
+  so?.addEventListener('input',()=>{document.getElementById('ov').textContent=so.value;});
+  sh?.addEventListener('input',()=>{document.getElementById('hv').textContent=parseFloat(sh.value).toFixed(1);});
+  document.getElementById('rstr')?.addEventListener('click',()=>{
+    const dl=parseInt(sd?.value||0),od=parseInt(so?.value||0),shv=parseFloat(sh?.value||0);
+    S.stressRes={isHigh:od>=2||dl>=3||shv>4,score:Math.min(100,dl*15+od*20+(shv>4?15:0)),dl,od,sh:shv};render();
+  });
+}
+function aProfile(){
+  document.getElementById('svp')?.addEventListener('click',()=>{
+    const n=document.getElementById('pfn')?.value.trim(),e=document.getElementById('pfe')?.value.trim();
+    if(!n||!e)return;
+    const updated={...S.user,name:n,email:e};Users.save(updated);S.user=updated;S.saved=true;render();setTimeout(()=>{S.saved=false;},3000);
+  });
+  document.getElementById('svg')?.addEventListener('click',()=>{
+    const k=document.getElementById('pfg')?.value.trim();
+    const updated={...S.user,groqKey:k};Users.save(updated);S.user=updated;S.saved=true;render();setTimeout(()=>{S.saved=false;},3000);
+  });
+  document.getElementById('deld')?.addEventListener('click',()=>{S.modal={type:'del'};renderModal();});
+}
+function aMod(type){
+  document.querySelectorAll('.mc').forEach(b=>b.addEventListener('click',()=>{S.modal=null;document.querySelector('.mo')?.remove();}));
+  if(type==='task'){
+    // Live session preview
+    const preview=()=>{
+      const title=document.getElementById('mt')?.value.trim();
+      const deadline=document.getElementById('md')?.value;
+      const hours=document.getElementById('mh')?.value;
+      const el=document.getElementById('sess-preview');
+      if(!el)return;
+      if(deadline&&hours&&parseFloat(hours)>0){
+        const mock={id:'preview',userId:S.user?.id||'',title:title||'Task',deadline,estimatedTime:hours,priority:'medium',status:'todo',course:''};
+        const desc=SessionGen.describe(mock);
+        if(desc){
+          const bars=Array.from({length:Math.min(desc.daysToUse,7)},(_,i)=>`<div class="fb" style="gap:6px;margin-bottom:3px"><span style="font-size:10px;color:var(--mut);min-width:40px">Day ${i+1}</span><div style="flex:1;height:5px;background:var(--s3);border-radius:99px;overflow:hidden"><div style="width:100%;height:100%;background:var(--green);border-radius:99px"></div></div><span style="font-size:10px;color:var(--green);font-weight:600">${desc.hpd}h</span></div>`).join('');
+          el.innerHTML=`<div style="padding:10px 12px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">${ico('split',12,'var(--green)')} ARIA will generate ${desc.daysToUse} sessions:</div>${bars}${desc.daysToUse>7?`<div style="font-size:11px;color:var(--mut);margin-top:4px">...and ${desc.daysToUse-7} more sessions</div>`:''}<div style="font-size:11px;color:var(--mut);margin-top:6px">${desc.hpd}h/day × ${desc.daysToUse} days = ${desc.totalHours}h total</div></div>`;
+        }else el.innerHTML='';
+      }else el.innerHTML='';
+    };
+    ['mt','md','mh'].forEach(id=>document.getElementById(id)?.addEventListener('input',preview));
+    preview();
+    document.getElementById('svt')?.addEventListener('click',async function(){
+      const title=document.getElementById('mt')?.value.trim();if(!title)return;
+      const data={title,course:document.getElementById('mc')?.value.trim()||'',deadline:document.getElementById('md')?.value||'',priority:document.getElementById('mp')?.value||'medium',status:document.getElementById('ms')?.value||'todo',estimatedTime:document.getElementById('mh')?.value||'',notes:document.getElementById('mn')?.value.trim()||''};
+      const existId=this.dataset.id;
+      const task={...(existId?S.tasks.find(t=>t.id===existId)||{}:{}), ...data, id:existId||uid2(), userId:S.user.id, createdAt:existId?(S.tasks.find(t=>t.id===existId)?.createdAt||Date.now()):Date.now()};
+      S.modal=null;document.querySelector('.mo')?.remove();
+      await saveTask(task);render();
+    });
+  }else if(type==='event'){
+    document.getElementById('sve')?.addEventListener('click',async()=>{
+      const t=document.getElementById('et')?.value.trim(),d=document.getElementById('ed')?.value;
+      if(!t||!d)return;
+      const ev={id:uid2(),userId:S.user.id,title:t,date:d,time:document.getElementById('eti')?.value||'09:00',duration:parseInt(document.getElementById('edu')?.value)||60,type:document.getElementById('ety')?.value||'study',createdAt:Date.now()};
+      await DB.saveEvent(ev);S.events.push(ev);
+      S.modal=null;document.querySelector('.mo')?.remove();render();
+    });
+  }else if(type==='groq'){
+    document.getElementById('sgks')?.addEventListener('click',()=>{
+      const k=document.getElementById('gki')?.value.trim();if(!k)return;
+      const updated={...S.user,groqKey:k};Users.save(updated);S.user=updated;
+      S.modal=null;document.querySelector('.mo')?.remove();render();
+    });
+  }else if(type==='del'){
+    document.getElementById('cda')?.addEventListener('click',async()=>{
+      // Delete everything from IndexedDB for this user
+      const uid=S.user.id;
+      const [tasks,sessions,events,msgs]=await Promise.all([
+        DB.getTasksByUser(uid),DB.getSessionsByUser(uid),DB.getEventsByUser(uid),DB.getMsgsByUser(uid)
+      ]);
+      await Promise.all([
+        ...tasks.map(t=>DB.deleteTask(t.id)),
+        ...sessions.map(s=>DB.deleteSession?DB.deleteSession(s.id):dbDel('sessions',s.id)),
+        ...events.map(e=>DB.deleteEvent(e.id)),
+        ...msgs.map(m=>dbDel('messages',m.id)),
+      ]);
+      S.tasks=[];S.sessions=[];S.events=[];S.msgs=[];
+      S.modal=null;document.querySelector('.mo')?.remove();S.page='dashboard';render();
+    });
+  }
+}
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+(async()=>{
+  S.user=await migrateStoredPasswords();
+  S.page=S.user?'dashboard':'landing';
+  if(S.user){
+    await loadData();
+  }
+  render();
+})();
+</script></body></html>
